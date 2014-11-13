@@ -23,9 +23,13 @@ class Camera(object):
         self.bu = kwargs['bu'] if 'bu' in kwargs else 1.0  # pixel scaling factor in horizontal direction
         self.bv = kwargs['bv'] if 'bv' in kwargs else 1.0  # pixel scaling factor in vertical direction
         self.position = np.array([0.0, 0.0, 0.0])  # starting at the world coordinate system's origin
-        self.orientation = np.array([[1.0, 0.0, 0.0],   # camera's horizontal axis
-                                     [0.0, 0.0, 1.0],   # camera's vertical axis
-                                     [0.0, -1.0, 0.0]])  # camera's optical axis
+
+        # 1st column is the camera's horizontal axis
+        # 2nd column is the camera's vertical axis
+        # 3rd column is the camera's optical axis
+        self.orientation = np.array([[1.0, 0.0, 0.0],
+                                     [0.0, 0.0, 1.0],
+                                     [0.0, -1.0, 0.0]])
 
     def horizontal_axis(self):
         return self.orientation[:, 0]
