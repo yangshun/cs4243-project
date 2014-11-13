@@ -1,4 +1,3 @@
-__author__ = 'minhtule'
 
 from app import app
 
