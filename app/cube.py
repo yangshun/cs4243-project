@@ -86,11 +86,11 @@ def generate_path_and_orientation():
     conj_pos_rot_quat = pos_rot_quat.conjugate()
     pos_quat = Quaternion.convert_from_vector(np.array([0.0, -CAMERA_DIST, 0.0]))
 
-    camera_rot_quat = Quaternion.rotation_quaternion(np.array([0.0, 0.0, 1.0]), rotation_angle)
+    camera_rot_quat = Quaternion.rotation_quaternion(np.array([0.0, 0.0, 1.0]), -rotation_angle)
     camera_rot_mat = camera_rot_quat.to_rotation_matrix()
     orientation = np.array([[1.0, 0.0, 0.0],
-                            [0.0, 0.0, 1.0],
-                            [0.0, -1.0, 0.0]])
+                            [0.0, 0.0, -1.0],
+                            [0.0, 1.0, 0.0]])
 
     path = [pos_quat.to_vector()]
     orientations = [orientation]
@@ -99,7 +99,7 @@ def generate_path_and_orientation():
         pos_quat = pos_rot_quat * pos_quat * conj_pos_rot_quat
         path.append(pos_quat.to_vector())
 
-        orientation = np.asarray(np.dot(camera_rot_mat, orientation))
+        orientation = np.asarray(np.dot(orientation, camera_rot_mat))
         orientations.append(orientation)
 
     return path, orientations
@@ -109,13 +109,13 @@ def generate_path_and_orientation():
 def generate_path_and_orientation_from_higher_up():
     pos_rot_quat = Quaternion.rotation_quaternion(np.array([0.0, 0.0, 1.0]), rotation_angle)
     conj_pos_rot_quat = pos_rot_quat.conjugate()
-    pos_quat = Quaternion.convert_from_vector(np.array([0.0, -CAMERA_DIST, 0.0]))
+    pos_quat = Quaternion.convert_from_vector(np.array([0.0, -CAMERA_DIST, 75.0]))
 
-    camera_rot_quat = Quaternion.rotation_quaternion(np.array([0.0, 0.0, 1.0]), rotation_angle)
+    camera_rot_quat = Quaternion.rotation_quaternion(np.array([0.0, 0.0, 1.0]), -rotation_angle)
     camera_rot_mat = camera_rot_quat.to_rotation_matrix()
     orientation = np.array([[1.0, 0.0, 0.0],
-                            [0.0, 0.0, 1.0],
-                            [0.0, -1.0, 0.0]])
+                            [0.0, 0.0, -1.0],
+                            [0.0, 1.0, 0.0]])
 
     path = [pos_quat.to_vector()]
     orientations = [orientation]
@@ -124,7 +124,7 @@ def generate_path_and_orientation_from_higher_up():
         pos_quat = pos_rot_quat * pos_quat * conj_pos_rot_quat
         path.append(pos_quat.to_vector())
 
-        orientation = np.asarray(np.dot(camera_rot_mat, orientation))
+        orientation = np.asarray(np.dot(orientation, camera_rot_mat))
         orientations.append(orientation)
 
     return path, orientations
