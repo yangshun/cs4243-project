@@ -4,6 +4,7 @@ import cv2.cv as cv
 import cv2
 import numpy as np
 from math import *
+from datetime import datetime
 
 
 from camera import Camera, Quaternion, generate_video
@@ -24,7 +25,7 @@ from surface import Surface, Polyhedron, Space
 
 CUBE_SIZE = 100.0
 IMAGE_SIZE = 200
-CAMERA_DIST = 250
+CAMERA_DIST = 200
 CUBE_IMAGE_PATH = STATIC_PATH + '/cube'
 
 @app.route('/cube')
@@ -34,11 +35,13 @@ def cube():
     space.add_model(build_cube(CUBE_SIZE/2, offset_x=CUBE_SIZE, offset_y=0, offset_z=0))
     space.add_model(build_cube(CUBE_SIZE/4, offset_x=-CUBE_SIZE, offset_y=-CUBE_SIZE, offset_z=-CUBE_SIZE/2))
 
-    camera = Camera(500.0, width=640, height=480)
+    # camera = Camera(500.0, width=640, height=480)
+    camera = Camera(50.0, width=100, height=100)
     camera_path, camera_orientation = generate_path_and_orientation()
     # camera_path, camera_orientation = generate_path_and_orientation_from_higher_up()
 
     frames = []
+    start_time = datetime.now()
     for camera_pos, camera_orientation in zip(camera_path, camera_orientation):
         camera.position = camera_pos
         camera.orientation = camera_orientation
@@ -46,7 +49,7 @@ def cube():
         frames.append(frame)
 
     generate_video(camera.width, camera.height, frames, 'cube')
-
+    print "time taken = ", datetime.now() - start_time
     return render_template('cube.html')
 
 
@@ -95,7 +98,7 @@ def generate_path_and_orientation():
     path = [pos_quat.to_vector()]
     orientations = [orientation]
 
-    for i in range(1, int(360 / step) + 1):
+    for i in range(1, int(180 / step) + 1):
         pos_quat = pos_rot_quat * pos_quat * conj_pos_rot_quat
         path.append(pos_quat.to_vector())
 

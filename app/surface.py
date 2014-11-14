@@ -29,7 +29,9 @@ class Surface(object):
         p3 = self.edge_points3d[3]
         v1 = p3 - p0
         v2 = p1 - p0
-        return np.cross(v1, v2)
+        normal = np.cross(v1, v2)
+        norm = np.linalg.norm(normal)
+        return normal / norm
 
 
 class Polyhedron(object):

@@ -18,5 +18,4 @@ class TestSurface(TestCase):
 
         expected_normal_unit = np.array([0, 0, 1])
 
-        self.assertNotAlmostEqual(np.linalg.norm(surface.normal), 0)
-        self.assertTrue(np.array_equal(surface.normal / np.linalg.norm(surface.normal), expected_normal_unit))
+        self.assertTrue(np.array_equal(surface.normal, expected_normal_unit))

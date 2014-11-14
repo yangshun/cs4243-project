@@ -56,7 +56,8 @@ class Camera(object):
     def project_surface(self, surface):
         camera_position_wrt_surface = self.position - surface.edge_points3d[0]
         if np.dot(surface.normal, camera_position_wrt_surface) <= 0:
-            return None
+            # camera is behind the surface
+            return None, None
 
         projected_points = []
         for point3D in surface.edge_points3d:
@@ -67,26 +68,73 @@ class Camera(object):
 
         projected_points = np.float32(projected_points)
         transform_matrix = cv2.getPerspectiveTransform(surface.edge_points2d, projected_points)
-        return cv2.warpPerspective(surface.image, transform_matrix, (self.width, self.height))
+        projected_image = cv2.warpPerspective(surface.image, transform_matrix, (self.width, self.height))
+
+        image_depth = self.__get_projected_image_depth(projected_image, surface)
+
+        return projected_image, image_depth
+        # return projected_image
+
+    def project_surfaces(self, surfaces):
+        print "start projection"
+        result_image = np.zeros((self.height, self.width, 3), np.uint8)
+        result_depth = np.ones((self.height, self.width)) * np.inf
+
+        for surface in surfaces:
+            # projected_image = self.project_surface(surface)
+            projected_image, image_depth = self.project_surface(surface)
+            if projected_image is not None:
+                # result_image = cv2.bitwise_or(result_image, projected_image)
+                result_image, result_depth = self.__overlay_images(result_image, result_depth,
+                                                                   projected_image, image_depth)
+
+        print "done"
+        return result_image
 
     def project_polyhedron(self, polyhedron):
-        result_image = self.__blank_image()
-        for surface in polyhedron.surfaces:
-            projected_image = self.project_surface(surface)
-            if projected_image is not None:
-                # result_image = cv2.addWeighted(result_image, 0.5, projected_image, 0.5, 0.0)
-                result_image = cv2.bitwise_or(result_image, projected_image)
-        return result_image
+        return self.project_surfaces(polyhedron.surfaces)
 
     def project_space(self, space):
-        result_image = self.__blank_image()
+        surfaces = []
         for model in space.models:
-            projected_image = self.project_polyhedron(model)
-            result_image = cv2.bitwise_or(result_image, projected_image)
-        return result_image
+            surfaces.extend(model.surfaces)
+        return self.project_surfaces(surfaces)
 
-    def __blank_image(self):
-        return np.zeros((self.height, self.width, 3), np.uint8)
+    def __get_projected_image_depth(self, projected_image, surface):
+        """
+        Let p is a point on the surface. We're using the 1st point on the surface
+            n is the normal vector of the surface
+            d is the vector pointing in the direction from the camera to the pixel on the image
+        Then the depth of the image pixel is the distance from the camera to the actual point
+        on the surface. This depth is calculated as
+            depth = (p . n) / (d . n)
+        where . is the dot product of 2 vectors
+
+        Note: all vectors are w.r.t. the camera's coordinate system.
+        """
+        image_depth = np.ones((self.height, self.width)) * np.inf
+        p = self.orientation.dot(surface.edge_points3d[0] - self.position)
+        n = self.orientation.dot(surface.normal)
+        t = p.dot(n)
+
+        for i in xrange(self.height):
+            for j in xrange(self.width):
+                if not np.allclose(projected_image[i, j], 0):
+                    d = np.array([j - self.half_width, i - self.half_height, self.focal])
+                    d /= np.linalg.norm(d)
+                    image_depth[i, j] = t / d.dot(n)
+
+        return image_depth
+
+    def __overlay_images(self, image1, image_depth1, image2, image_depth2):
+        height, width, _ = image1.shape
+        for i in xrange(height):
+            for j in xrange(width):
+                if image_depth2[i, j] < image_depth1[i, j]:
+                    image_depth1[i, j] = image_depth2[i, j]
+                    image1[i, j] = image2[i, j]
+
+        return image1, image_depth1
 
 
 class Quaternion(object):
