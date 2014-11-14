@@ -72,10 +72,10 @@ def build_cube():
     bottom_surface = Surface(bottom_img, np.array([p1, p2, p6, p5]), img_2d_corners)
     back_surface = Surface(back_img, np.array([p7, p8, p5, p6]), img_2d_corners)
 
-    return Polyhedron([front_surface, left_surface, right_surface])
-                       # top_surface, bottom_surface, back_surface])
+    return Polyhedron([front_surface, left_surface, right_surface,
+                       top_surface, bottom_surface, back_surface])
 
-step = 10  # smaller is better
+step = 5  # smaller is better
 rotation_angle = pi * step / 180
 
 
@@ -93,7 +93,7 @@ def generate_path_and_orientation():
     path = [pos_quat.to_vector()]
     orientations = [orientation]
 
-    for i in range(1, int(360 / step)):
+    for i in range(1, int(360 / step) + 1):
         pos_quat = pos_rot_quat * pos_quat * conj_pos_rot_quat
         path.append(pos_quat.to_vector())
 

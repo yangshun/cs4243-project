@@ -2,7 +2,6 @@ import numpy as np
 from math import *
 import cv2.cv as cv
 import cv2 as cv2
-import surface
 
 
 # For this project, our world coordinate is defined as following
@@ -58,6 +57,10 @@ class Camera(object):
         return u, v
 
     def surface_projection(self, surface):
+        camera_position_wrt_surface = self.position - surface.edge_points3d[0]
+        if np.dot(surface.normal, camera_position_wrt_surface) <= 0:
+            return None
+
         projected_points = []
         for point3D in surface.edge_points3d:
             projected_point_wrt_center = self.point_projection(point3D)
@@ -73,10 +76,12 @@ class Camera(object):
         if len(polyhedron.surfaces) == 0:
             return None
 
-        result_image = self.surface_projection(polyhedron.surfaces[0])
-        for i in range(1, len(polyhedron.surfaces)):
-            projected_image = self.surface_projection(polyhedron.surfaces[i])
-            result_image = cv2.addWeighted(result_image, 0.5, projected_image, 0.5, 0.0)
+        result_image = np.zeros((self.height, self.width, 3), np.uint8)
+        for surface in polyhedron.surfaces:
+            projected_image = self.surface_projection(surface)
+            if projected_image is not None:
+                # result_image = cv2.addWeighted(result_image, 0.5, projected_image, 0.5, 0.0)
+                result_image = cv2.bitwise_or(result_image, projected_image)
         return result_image
 
 
