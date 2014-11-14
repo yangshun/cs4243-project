@@ -56,7 +56,7 @@ class Camera(object):
         v = self.v0 + self.focal * np.dot(d, self.vertical_axis()) * self.bv / np.dot(d, self.optical_axis())
         return u, v
 
-    def surface_projection(self, surface):
+    def project_surface(self, surface):
         camera_position_wrt_surface = self.position - surface.edge_points3d[0]
         if np.dot(surface.normal, camera_position_wrt_surface) <= 0:
             return None
@@ -72,19 +72,19 @@ class Camera(object):
         transform_matrix = cv2.getPerspectiveTransform(surface.edge_points2d, projected_points)
         return cv2.warpPerspective(surface.image, transform_matrix, (self.width, self.height))
 
-    def polyhedron_projection(self, polyhedron):
+    def project_polyhedron(self, polyhedron):
         result_image = np.zeros((self.height, self.width, 3), np.uint8)
         for surface in polyhedron.surfaces:
-            projected_image = self.surface_projection(surface)
+            projected_image = self.project_surface(surface)
             if projected_image is not None:
                 # result_image = cv2.addWeighted(result_image, 0.5, projected_image, 0.5, 0.0)
                 result_image = cv2.bitwise_or(result_image, projected_image)
         return result_image
 
-    def space_projection(self, space):
+    def project_space(self, space):
         result_image = np.zeros((self.height, self.width, 3), np.uint8)
         for model in space.models:
-            projected_image = self.polyhedron_projection(model)
+            projected_image = self.project_polyhedron(model)
             result_image = cv2.bitwise_or(result_image, projected_image)
         return result_image
 

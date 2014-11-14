@@ -34,7 +34,7 @@ def cube():
     space.add_model(build_cube(CUBE_SIZE/2, offset_x=CUBE_SIZE, offset_y=0, offset_z=0))
     space.add_model(build_cube(CUBE_SIZE/4, offset_x=-CUBE_SIZE, offset_y=-CUBE_SIZE, offset_z=-CUBE_SIZE/2))
 
-    camera = Camera(200.0, width=640, height=480)
+    camera = Camera(500.0, width=640, height=480)
     camera_path, camera_orientation = generate_path_and_orientation()
     # camera_path, camera_orientation = generate_path_and_orientation_from_higher_up()
 
@@ -42,10 +42,10 @@ def cube():
     for camera_pos, camera_orientation in zip(camera_path, camera_orientation):
         camera.position = camera_pos
         camera.orientation = camera_orientation
-        frame = camera.space_projection(space)
+        frame = camera.project_space(space)
         frames.append(frame)
 
-    generate_video(640, 480, frames, 'cube')
+    generate_video(camera.width, camera.height, frames, 'cube')
 
     return render_template('cube.html')
 

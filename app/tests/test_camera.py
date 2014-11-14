@@ -17,18 +17,18 @@ class TestCamera(TestCase):
         edge_2dpoints = np.array([(0, 0), (0, 0), (0, 0), (0, 0)])
         surface = Surface(None, edge_3dpoints, edge_2dpoints)
 
-        self.assertIsNone(self.camera.surface_projection(surface))
+        self.assertIsNone(self.camera.project_surface(surface))
 
     def testSurfaceProjection_rightPerpendicularSurface_shouldNotProject(self):
         edge_3dpoints = np.array([(1, 0, 1), (1, 1, 1), (1, 1, 0), (1, 0, 0)])
         edge_2dpoints = np.array([(0, 0), (0, 0), (0, 0), (0, 0)])
         surface = Surface(None, edge_3dpoints, edge_2dpoints)
 
-        self.assertIsNone(self.camera.surface_projection(surface))
+        self.assertIsNone(self.camera.project_surface(surface))
 
     def testSurfaceProjection_backParallelSurface_shouldNotProject(self):
         edge_3dpoints = np.array([(1, 1, 1), (0, 1, 1), (0, 1, 0), (1, 1, 0)])
         edge_2dpoints = np.array([(0, 0), (0, 0), (0, 0), (0, 0)])
         surface = Surface(None, edge_3dpoints, edge_2dpoints)
 
-        self.assertIsNone(self.camera.surface_projection(surface))
+        self.assertIsNone(self.camera.project_surface(surface))

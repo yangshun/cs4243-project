@@ -61,11 +61,11 @@ def video():
     for camera_pos, camera_orientation in zip(camera_path, camera_orientation):
         camera.position = camera_pos
         camera.orientation = camera_orientation
-        projected_image1 = camera.surface_projection(plane1)
-        projected_image2 = camera.surface_projection(plane2)
-        projected_image3 = camera.surface_projection(plane3)
-        projected_image4 = camera.surface_projection(plane4)
-        projected_image5 = camera.surface_projection(plane5)
+        projected_image1 = camera.project_surface(plane1)
+        projected_image2 = camera.project_surface(plane2)
+        projected_image3 = camera.project_surface(plane3)
+        projected_image4 = camera.project_surface(plane4)
+        projected_image5 = camera.project_surface(plane5)
         frame = cv2.addWeighted(projected_image1, 0.5, projected_image3, 0.5, 0.0)
         #frame = cv2.addWeighted(frame, 0.5, projected_image4, 0.5, 0.0)
         #frame = cv2.addWeighted(frame, 0.5, projected_image5, 0.5, 0.0)
