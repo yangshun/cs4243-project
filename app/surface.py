@@ -35,3 +35,12 @@ class Surface(object):
 class Polyhedron(object):
     def __init__(self, surfaces):
         self.surfaces = surfaces
+
+
+class Space(object):
+    def __init__(self, models=None):
+        self.models = models or []
+
+    def add_model(self, model):
+        assert isinstance(model, Polyhedron)
+        self.models.append(model)

@@ -73,15 +73,19 @@ class Camera(object):
         return cv2.warpPerspective(surface.image, transform_matrix, (self.width, self.height))
 
     def polyhedron_projection(self, polyhedron):
-        if len(polyhedron.surfaces) == 0:
-            return None
-
         result_image = np.zeros((self.height, self.width, 3), np.uint8)
         for surface in polyhedron.surfaces:
             projected_image = self.surface_projection(surface)
             if projected_image is not None:
                 # result_image = cv2.addWeighted(result_image, 0.5, projected_image, 0.5, 0.0)
                 result_image = cv2.bitwise_or(result_image, projected_image)
+        return result_image
+
+    def space_projection(self, space):
+        result_image = np.zeros((self.height, self.width, 3), np.uint8)
+        for model in space.models:
+            projected_image = self.polyhedron_projection(model)
+            result_image = cv2.bitwise_or(result_image, projected_image)
         return result_image
 
 
@@ -143,6 +147,7 @@ class Quaternion(object):
 
 
 def generate_video(width, height, frames, file_name, file_path='./app/static'):
+    print 'generating video'
     fps = 15
     cap_size = (width, height)
     fourcc = cv.CV_FOURCC('a', 'v', 'c', '1')  # Apple's version of the MPEG4 http://www.fourcc.org/codecs.php
