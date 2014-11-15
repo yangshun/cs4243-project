@@ -47,17 +47,22 @@ class Camera(object):
             of the camera
 
         """
-        d = scene_point - self.position
+        dist = scene_point - self.position
+        d = np.dot(dist, self.optical_axis())
+        if d == 0:
+            # to avoid explosion!!!
+            d = np.finfo(np.float32).eps
 
-        u = self.u0 + self.focal * np.dot(d, self.horizontal_axis()) * self.bu / np.dot(d, self.optical_axis())
-        v = self.v0 + self.focal * np.dot(d, self.vertical_axis()) * self.bv / np.dot(d, self.optical_axis())
+        u = self.u0 + self.focal * np.dot(dist, self.horizontal_axis()) * self.bu / d
+        v = self.v0 + self.focal * np.dot(dist, self.vertical_axis()) * self.bv / d
         return u, v
 
     def project_surface(self, surface):
         camera_position_wrt_surface = self.position - surface.edge_points3d[0]
         if np.dot(surface.normal, camera_position_wrt_surface) <= 0:
             # camera is behind the surface
-            return None, None
+            # return None, None
+            return None
 
         projected_points = []
         for point3D in surface.edge_points3d:
