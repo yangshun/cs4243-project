@@ -2,7 +2,7 @@ import numpy as np
 from math import *
 import cv2.cv as cv
 import cv2 as cv2
-
+from helper import *
 
 # For this project, our world coordinate is defined as following
 #   x-axis      left -> right, on the ground surface
@@ -55,7 +55,7 @@ class Camera(object):
 
         u = self.u0 + self.focal * np.dot(dist, self.horizontal_axis()) * self.bu / d
         v = self.v0 + self.focal * np.dot(dist, self.vertical_axis()) * self.bv / d
-        return u, v
+        return box_coord(u), box_coord(v)
 
     def project_surface(self, surface):
         camera_position_wrt_surface = self.position - surface.edge_points3d[0]
