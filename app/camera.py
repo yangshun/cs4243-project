@@ -70,10 +70,10 @@ class Camera(object):
         transform_matrix = cv2.getPerspectiveTransform(surface.edge_points2d, projected_points)
         projected_image = cv2.warpPerspective(surface.image, transform_matrix, (self.width, self.height))
 
-        image_depth = self.__get_projected_image_depth(projected_image, surface)
+        # image_depth = self.__get_projected_image_depth(projected_image, surface)
 
-        return projected_image, image_depth
-        # return projected_image
+        # return projected_image, image_depth
+        return projected_image
 
     def project_surfaces(self, surfaces):
         print "start projection"
@@ -81,12 +81,12 @@ class Camera(object):
         result_depth = np.ones((self.height, self.width)) * np.inf
 
         for surface in surfaces:
-            # projected_image = self.project_surface(surface)
-            projected_image, image_depth = self.project_surface(surface)
+            projected_image = self.project_surface(surface)
+            # projected_image, image_depth = self.project_surface(surface)
             if projected_image is not None:
-                # result_image = cv2.bitwise_or(result_image, projected_image)
-                result_image, result_depth = self.__overlay_images(result_image, result_depth,
-                                                                   projected_image, image_depth)
+                result_image = cv2.bitwise_or(result_image, projected_image)
+                # result_image, result_depth = self.__overlay_images(result_image, result_depth,
+                #                                                    projected_image, image_depth)
 
         print "done"
         return result_image
