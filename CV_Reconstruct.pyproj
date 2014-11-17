@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{26db6e2a-9066-417d-9d94-07571a6a978d}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>server.py</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <ProjectTypeGuids>{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <InterpreterId />
+    <InterpreterVersion />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
+    <PtvsTargetsFile>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets</PtvsTargetsFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="app\static\campus\bottom.png" />
+    <Content Include="app\static\campus\bottom_origin.png" />
+    <Content Include="app\static\campus\center.png" />
+    <Content Include="app\static\campus\center_origin.png" />
+    <Content Include="app\static\campus\left.png" />
+    <Content Include="app\static\campus\left_origin.png" />
+    <Content Include="app\static\campus\right.png" />
+    <Content Include="app\static\campus\right_origin.png" />
+    <Content Include="app\static\campus\top.png" />
+    <Content Include="app\static\campus\top_origin.png" />
+    <Content Include="app\static\cube\back.png" />
+    <Content Include="app\static\cube\bottom.png" />
+    <Content Include="app\static\cube\front.png" />
+    <Content Include="app\static\cube\left.png" />
+    <Content Include="app\static\cube\right.png" />
+    <Content Include="app\static\cube\top.png" />
+    <Content Include="app\static\libs\three.min.js" />
+    <Content Include="app\templates\campus.html" />
+    <Content Include="app\templates\cube.html" />
+    <Content Include="app\templates\index.html" />
+    <Content Include="app\templates\video.html" />
+    <Content Include="project.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="app\camera.py" />
+    <Compile Include="app\campus.py" />
+    <Compile Include="app\controllers.py" />
+    <Compile Include="app\cube.py" />
+    <Compile Include="app\helper.py" />
+    <Compile Include="app\surface.py" />
+    <Compile Include="app\tests\test_camera.py" />
+    <Compile Include="app\tests\test_surface.py" />
+    <Compile Include="app\__init__.py" />
+    <Compile Include="server.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="app" />
+    <Folder Include="app\static\" />
+    <Folder Include="app\static\campus" />
+    <Folder Include="app\static\cube" />
+    <Folder Include="app\static\libs" />
+    <Folder Include="app\templates" />
+    <Folder Include="app\tests" />
+  </ItemGroup>
+  <Import Project="$(PtvsTargetsFile)" Condition="Exists($(PtvsTargetsFile))" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="!Exists($(PtvsTargetsFile))" />
+</Project>
