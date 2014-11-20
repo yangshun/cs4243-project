@@ -62,7 +62,7 @@
                                                     <input type="text" class="form-control" placeholder="Bottom Right Y" ng-model="bottomRight.y" ng-blur="renderBoundaryRect()">
                                                 </div>
                                                 <br>
-                                                <button class="btn [[ {true: 'btn-danger', false: 'btn-success'}[boundaryRectEditable] ]]" ng-click="toggleBoundaryRectEditing()">[[ {true: 'Stop', false: 'Enable'}[boundaryRectEditable] ]] Editing</button>
+                                                <button class="btn [[ {true: 'btn-danger', false: 'btn-success'}[boundaryRectEditable] ]]" ng-disabled="isDrawingPath" ng-click="toggleBoundaryRectEditing()">[[ {true: 'Stop', false: 'Enable'}[boundaryRectEditable] ]] Editing</button>
                                                 <br>
                                                 <br>
                                                 <label class="control-label">Real World Boundary Box Dimensions</label>
@@ -75,7 +75,8 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <button class="btn btn-warning btn-block" ng-click="toggleDrawingPath()">[[ {true: 'Stop Drawing', false: 'Draw Camera Path'}[isDrawingPath] ]]</button>
+                                    <button class="btn btn-warning btn-block" ng-disabled="boundaryRectEditable" ng-click="toggleDrawingPath()">[[ {true: 'Stop Drawing', false: 'Draw Camera Path'}[isDrawingPath] ]]</button>
+                                    <button class="btn btn-success btn-block" ng-disabled="boundaryRectEditable || isDrawingPath" ng-click="renderVideoWithPath()">Render Video</button>
                                 </div>
                             </div>
                         </div>

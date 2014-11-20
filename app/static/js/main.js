@@ -13,20 +13,21 @@ angular.module('CameraApp', []).config(function ($interpolateProvider) {
 });
 
 function CameraController ($scope) {
-  var canvas = new fabric.Canvas('map-container', {
+  canvas = new fabric.Canvas('map-container', {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT
   });
-
-  // canvas.on('mouse:down', function (options) {
-  //   console.log(options.e.clientX, options.e.clientY);
-  // });
 
   $scope.topLeft = {x: BOUNDARY_RECT_TOP_LEFT_X, y: BOUNDARY_RECT_TOP_LEFT_Y};
   $scope.bottomRight = {x: BOUNDARY_RECT_BOTTOM_LEFT_X, y: BOUNDARY_RECT_BOTTOM_LEFT_Y};
   $scope.boundaryWidth = BOUNDARY_RECT_REAL_WIDTH;
   $scope.boundaryHeight = BOUNDARY_RECT_REAL_HEIGHT;
-  $scope.boundaryRectEditable = true;
+  $scope.boundaryRectEditable = false;
+
+  var boundaryRect = new fabric.Rect({
+    fill: 'rgba(0,188,140,0.2)',
+    lockRotation: true
+  });
 
   function getBoundaryRectProps () {
     return {
@@ -38,7 +39,9 @@ function CameraController ($scope) {
   }
 
   canvas.on('object:modified', function (object) {
-    updateBoundaryRect(object.target);
+    if (object.target === boundaryRect) {
+      updateBoundaryRect(object.target);
+    }
   });
 
   function updateBoundaryRect (rect) {
@@ -50,7 +53,7 @@ function CameraController ($scope) {
   }
 
   function toggleBoundaryRectEditing (state) {
-    $scope.boundaryRectEditable = state ? state : !$scope.boundaryRectEditable;
+    $scope.boundaryRectEditable = typeof state !== 'undefined' ? state : !$scope.boundaryRectEditable;
     if ($scope.boundaryRectEditable) {
       toggleDrawingPath(false);
     }
@@ -71,18 +74,68 @@ function CameraController ($scope) {
   $scope.isDrawingPath = false;
 
   function toggleDrawingPath (state) {
-    $scope.isDrawingPath = state ? state: !$scope.isDrawingPath;
+    $scope.isDrawingPath = typeof state !== 'undefined' ? state: !$scope.isDrawingPath;
     if ($scope.isDrawingPath) {
       toggleBoundaryRectEditing(false);
+    } else {
+      canvas.getObjects().filter(function (obj) {
+        return !!obj.path;
+      }).forEach(function (obj) {
+        obj.set({
+          lockMovementX: true,
+          lockMovementY: true,
+          lockRotation: true,
+          lockScalingX: true,
+          lockScalingY: true
+        });
+      });
     }
     canvas.isDrawingMode = $scope.isDrawingPath;
     canvas.renderAll();
-  };
+  }
 
-  var boundaryRect = new fabric.Rect({
-    fill: 'rgba(0,188,140,0.2)',
-    lockRotation: true
-  });
+  function normalizePathPoints (pathPoints) {
+    pathPoints.forEach(function (point) {
+      // Map to boundary box coordinates
+      point.x -= $scope.topLeft.x;
+      point.y -= $scope.topLeft.y;
+    });
+    pathPoints.forEach(function (point) {
+      var boundaryBoxX = point.x;
+      var boundaryBoxY = point.y;
+      point.x = Math.round(((-boundaryBoxY/boundaryRect.currentHeight) + 0.5) * $scope.boundaryHeight, 2);
+      point.y = Math.round(-boundaryBoxX/boundaryRect.currentWidth * $scope.boundaryWidth, 2);
+
+    });
+    return pathPoints;
+  }
+
+  $scope.renderVideoWithPath = function () {
+    var pathObject = canvas.getActiveObject();
+    if (!pathObject) {
+      alert('You must select one camera path!');
+      return;
+    }
+    var paths = [];
+    pathObject.path.forEach(function (point) {
+      if (point.length === 3) {
+        paths.push({
+          x: point[1],
+          y: point[2]
+        });
+      } else if (point.length === 5) {
+        paths.push({
+          x: point[1],
+          y: point[2]
+        });
+        paths.push({
+          x: point[3],
+          y: point[4]
+        });
+      }
+    });
+    console.log(normalizePathPoints(paths));
+  }
 
   toggleDrawingPath($scope.isDrawingPath);
   toggleBoundaryRectEditing($scope.boundaryRectEditable);
