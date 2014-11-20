@@ -13,6 +13,7 @@
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
         <link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
         <script src="{{ url_for('static', filename='js/vendor/modernizr-2.6.2.min.js') }}"></script>
         
     </head>
@@ -22,10 +23,11 @@
         <![endif]-->
 
         <!-- Add your site or application content here -->
-        <p>Hello world! This is HTML5 Boilerplate.</p>
-
+        <!-- <img src="{{ url_for('static', filename='img/aerial-view.jpg') }}"> -->
+        <canvas id="map-container"></canvas>
         
         <script src="{{ url_for('static', filename='js/vendor/jquery-1.10.2.min.js') }}"></script>
+        <script src="{{ url_for('static', filename='js/vendor/fabric.min.js') }}"></script>
         <script src="{{ url_for('static', filename='js/plugins.js') }}"></script>
         <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     </body>
