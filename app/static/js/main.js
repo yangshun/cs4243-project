@@ -39,7 +39,8 @@ function CameraController ($scope) {
 
   var boundaryRect = new fabric.Rect({
     fill: 'rgba(0,188,140,0.2)',
-    lockRotation: true
+    lockRotation: true,
+    selectable: $scope.boundaryRectEditable
   });
   boundaryRect.set(getBoundaryRectProps());
 
@@ -63,7 +64,8 @@ function CameraController ($scope) {
   $scope.toggleEditing = function () {
     $scope.boundaryRectEditable = !$scope.boundaryRectEditable;
     boundaryRect.set({
-      selectable: $scope.boundaryRectEditable
+      selectable: $scope.boundaryRectEditable,
+      fill: $scope.boundaryRectEditable ? 'rgba(0,188,140,0.2)' : 'rgba(178,74,24,0.2)'
     });
     canvas.renderAll();
   };
