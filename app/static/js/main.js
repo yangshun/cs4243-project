@@ -94,6 +94,20 @@ function CameraController ($scope) {
     canvas.renderAll();
   }
 
+  $('html').keydown(function (e) {
+    if (e.keyCode == 8) {
+      var pathObject = canvas.getActiveObject();
+      if (pathObject && pathObject !== boundaryRect && pathObject.path) {
+        e.preventDefault();
+        canvas.fxRemove(pathObject);
+      }
+    }
+  });
+
+  $('input').focus(function () {
+    canvas.deactivateAll().renderAll();
+  });
+
   function normalizePathPoints (pathPoints) {
     pathPoints.forEach(function (point) {
       // Map to boundary box coordinates
@@ -101,11 +115,11 @@ function CameraController ($scope) {
       point.y -= $scope.topLeft.y;
     });
     pathPoints.forEach(function (point) {
+      // Map to camera coordinates
       var boundaryBoxX = point.x;
       var boundaryBoxY = point.y;
       point.x = Math.round(((-boundaryBoxY/boundaryRect.currentHeight) + 0.5) * $scope.boundaryHeight, 2);
       point.y = Math.round(-boundaryBoxX/boundaryRect.currentWidth * $scope.boundaryWidth, 2);
-
     });
     return pathPoints;
   }
@@ -134,7 +148,9 @@ function CameraController ($scope) {
         });
       }
     });
-    console.log(normalizePathPoints(paths));
+    var cameraPathPoints = normalizePathPoints(paths);
+    console.log(cameraPathPoints);
+    // Do something with cameraPathPoints.
   }
 
   toggleDrawingPath($scope.isDrawingPath);
