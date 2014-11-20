@@ -12,7 +12,7 @@ angular.module('CameraApp', []).config(function ($interpolateProvider) {
     $interpolateProvider.startSymbol('[[').endSymbol(']]');
 });
 
-function CameraController ($scope) {
+function CameraController ($scope, $http) {
   canvas = new fabric.Canvas('map-container', {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT
@@ -150,7 +150,14 @@ function CameraController ($scope) {
     });
     var cameraPathPoints = normalizePathPoints(paths);
     console.log(cameraPathPoints);
-    // Do something with cameraPathPoints.
+
+    $http.post('/campus', {camera_path: cameraPathPoints}).
+      success(function(data, status, headers, config) {
+        alert(data);
+      }).
+      error(function(data, status, headers, config) {
+        console.log("failed lol");
+      });
   }
 
   toggleDrawingPath($scope.isDrawingPath);

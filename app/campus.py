@@ -1,4 +1,5 @@
-from flask import render_template
+from flask import render_template, request
+import json
 from app import *
 import cv2
 import numpy as np
@@ -47,8 +48,10 @@ CORNERS_3D = {
     'bottom': np.array([(-WIDTH/2.0, 0, 0), (WIDTH/2.0, 0, 0), (WIDTH/2.0, -DEPTH, 0), (-WIDTH/2.0, -DEPTH, 0)]),
 }
 
-@app.route('/campus')
+@app.route('/campus', methods=['POST'])
 def campus():
+    data = json.loads(request.data)
+
     space = Space()
 
     image_names = ['center', 'right', 'left', 'top', 'bottom']
@@ -59,8 +62,8 @@ def campus():
         space.add_model(Polyhedron([surface]))
 
     camera = Camera(DEPTH, width=1566, height=646)
-    camera_path = generate_path()
-    camera_orientation = generate_camera_orientation()
+    camera_path = generate_path(data['camera_path'])
+    camera_orientation = generate_camera_orientation(camera_path)
 
     frames = []
     for camera_pos, camera_orientation in zip(camera_path, camera_orientation):
@@ -69,15 +72,34 @@ def campus():
         frame = camera.project_space(space)
         frames.append(frame)
 
-    generate_video(camera.width, camera.height, frames, 'video')
+    generate_video(camera.width, camera.height, frames, 'campus')
 
-    return render_template('video.html', name='CS4244')
+    return 'Done!'
 
 
+def generate_path(path_points2d):
+    points = []
+
+    for point2d in path_points2d:
+        point3d = (point2d['x'], point2d['y'], 30)
+        points.append(point3d)
+
+    return points
+
+
+def generate_camera_orientation(path):
+    orientations = []
+    for i in range(len(path)):
+        orientations.append(np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]]))
+    return orientations
+
+#################
+# OLD CODE!!!!
+#################
 num_of_points = 50
 
 
-def generate_path():
+def old_generate_path():
     points = []
     for i in range(1, num_of_points + 1):
         # points.append((0.0, -DEPTH, HEIGHT/2.0))
@@ -85,7 +107,7 @@ def generate_path():
     return np.array(points)
 
 
-def generate_camera_orientation():
+def old_generate_camera_orientation():
     orientations = []
     for i in range(90 - num_of_points/2, 90 + num_of_points/2):
     # for i in range(0, 180, 180 // num_of_points):
