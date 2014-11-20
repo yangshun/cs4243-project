@@ -37,13 +37,6 @@ function CameraController ($scope) {
     }
   }
 
-  var boundaryRect = new fabric.Rect({
-    fill: 'rgba(0,188,140,0.2)',
-    lockRotation: true,
-    selectable: $scope.boundaryRectEditable
-  });
-  boundaryRect.set(getBoundaryRectProps());
-
   canvas.on('object:modified', function (object) {
     updateBoundaryRect(object.target);
   });
@@ -56,19 +49,47 @@ function CameraController ($scope) {
     $scope.$apply();
   }
 
+  function toggleBoundaryRectEditing (state) {
+    $scope.boundaryRectEditable = state ? state : !$scope.boundaryRectEditable;
+    if ($scope.boundaryRectEditable) {
+      toggleDrawingPath(false);
+    }
+    boundaryRect.set({
+      selectable: $scope.boundaryRectEditable,
+      fill: $scope.boundaryRectEditable ? 'rgba(0,188,140,0.2)' : 'rgba(178,74,24,0.2)',
+      hasControls: $scope.boundaryRectEditable,
+      hasBorders: $scope.boundaryRectEditable
+    });
+    canvas.renderAll();
+  };
+
   $scope.renderBoundaryRect = function () {
     boundaryRect.set(getBoundaryRectProps());
     canvas.renderAll();
   };
 
-  $scope.toggleEditing = function () {
-    $scope.boundaryRectEditable = !$scope.boundaryRectEditable;
-    boundaryRect.set({
-      selectable: $scope.boundaryRectEditable,
-      fill: $scope.boundaryRectEditable ? 'rgba(0,188,140,0.2)' : 'rgba(178,74,24,0.2)'
-    });
+  $scope.isDrawingPath = false;
+
+  function toggleDrawingPath (state) {
+    $scope.isDrawingPath = state ? state: !$scope.isDrawingPath;
+    if ($scope.isDrawingPath) {
+      toggleBoundaryRectEditing(false);
+    }
+    canvas.isDrawingMode = $scope.isDrawingPath;
     canvas.renderAll();
   };
+
+  var boundaryRect = new fabric.Rect({
+    fill: 'rgba(0,188,140,0.2)',
+    lockRotation: true
+  });
+
+  toggleDrawingPath($scope.isDrawingPath);
+  toggleBoundaryRectEditing($scope.boundaryRectEditable);
+  boundaryRect.set(getBoundaryRectProps());
+
+  $scope.toggleBoundaryRectEditing = toggleBoundaryRectEditing;
+  $scope.toggleDrawingPath = toggleDrawingPath;
 
   fabric.Image.fromURL('/static/img/aerial-view.jpg', function (img) {
     img.set('selectable', false);
