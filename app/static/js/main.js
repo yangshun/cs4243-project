@@ -124,6 +124,7 @@ function CameraController ($scope, $http) {
     return pathPoints;
   }
 
+  $scope.renderingVideo = false;
   $scope.renderVideoWithPath = function () {
     var pathObject = canvas.getActiveObject();
     if (!pathObject) {
@@ -149,15 +150,25 @@ function CameraController ($scope, $http) {
       }
     });
     var cameraPathPoints = normalizePathPoints(paths);
-    console.log(cameraPathPoints);
 
-    $http.post('/campus', {camera_path: cameraPathPoints}).
-      success(function(data, status, headers, config) {
-        alert(data);
-      }).
-      error(function(data, status, headers, config) {
-        console.log("failed lol");
-      });
+    $scope.renderingVideo = true;
+    $http.post('/generate_video', {
+      camera_path: cameraPathPoints,
+      file_name: new Date().getTime()
+    }).success(function (res, status, headers, config) {
+      if (res.status === 'success') {
+        $scope.renderingVideo = false;
+        var video = res.video;
+        var $videoPlayer = $('.video-player');
+        $videoPlayer.width(video.width);
+        $videoPlayer.height(video.height);
+        $videoPlayer.attr('src', video.src);
+        $('#video-modal').modal();
+      }
+    }).error(function (res, status, headers, config) {
+      alert('Rendering failed');
+      $scope.renderingVideo = false;
+    });
   }
 
   $scope.getRenderVideoButtonState = function () {

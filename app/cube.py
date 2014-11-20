@@ -6,10 +6,8 @@ import numpy as np
 from math import *
 from datetime import datetime
 
-
 from camera import Camera, Quaternion, generate_video
 from surface import Surface, Polyhedron, Space
-
 
 # The world origin is chosen to be at the center of the cube.
 # Let the cube size be w. The bottom left corner of the

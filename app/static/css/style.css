@@ -1,3 +1,11 @@
 .canvas-container {
   margin-bottom: 20px;
 }
+
+.modal-dialog {
+  width: 1024px !important;
+}
+
+#video-modal .modal-body {
+  width: 970px;
+}

@@ -48,7 +48,7 @@ CORNERS_3D = {
     'bottom': np.array([(-WIDTH/2.0, 0, 0), (WIDTH/2.0, 0, 0), (WIDTH/2.0, -DEPTH, 0), (-WIDTH/2.0, -DEPTH, 0)]),
 }
 
-@app.route('/campus', methods=['POST'])
+@app.route('/generate_video', methods=['POST'])
 def campus():
     data = json.loads(request.data)
 
@@ -61,7 +61,9 @@ def campus():
         surface = Surface(image, CORNERS_3D[image_name], CORNERS_2D[image_name])
         space.add_model(Polyhedron([surface]))
 
-    camera = Camera(DEPTH, width=1566, height=646)
+    camera_width = 970
+    camera_height = 400
+    camera = Camera(DEPTH, width=970, height=400)
     camera_path = generate_path(data['camera_path'])
     camera_orientation = generate_camera_orientation(camera_path)
 
@@ -72,10 +74,13 @@ def campus():
         frame = camera.project_space(space)
         frames.append(frame)
 
-    generate_video(camera.width, camera.height, frames, 'campus')
+    file_name = data['file_name']
 
-    return 'Done!'
+    file_path = generate_video(camera.width, camera.height, frames, file_name)
 
+    return json.dumps({ 'status': 'success', 
+                        'video': {'name': file_name, 'width': camera_width, 'height': camera_height, 'src': file_path}
+                    })
 
 def generate_path(path_points2d):
     points = []

@@ -6,9 +6,8 @@ from helper import *
 
 # For this project, our world coordinate is defined as following
 #   x-axis      left -> right, on the ground surface
-#   y-axis      pointing inward the image, on the ground surface
+#   y-axis      pointing into the image, on the ground surface
 #   z-axis      pointing upward to the sky
-
 
 class Camera(object):
     def __init__(self, focal, **kwargs):
@@ -199,14 +198,16 @@ class Quaternion(object):
             raise TypeError("Cannot multiply non-quaternion object.")
 
 
-def generate_video(width, height, frames, file_name, file_path='./app/static'):
+def generate_video(width, height, frames, file_name, path='./app/static/video'):
     print 'generating video'
     fps = 15
     cap_size = (width, height)
     fourcc = cv.CV_FOURCC('a', 'v', 'c', '1')  # Apple's version of the MPEG4 http://www.fourcc.org/codecs.php
-    writer = cv2.VideoWriter('%s/%s.mp4' % (file_path, file_name), fourcc, fps, cap_size, True)
+    file_path = '%s/%s.mp4' % (path, file_name)
+    writer = cv2.VideoWriter(file_path, fourcc, fps, cap_size, True)
 
     for x in range(len(frames)):
         writer.write(frames[x])
     writer.release()
     print 'video generated'
+    return '/static/video/%s.mp4' % (file_name)
