@@ -76,7 +76,7 @@
                                         </div>
                                     </div>
                                     <button class="btn btn-warning btn-block" ng-disabled="boundaryRectEditable" ng-click="toggleDrawingPath()">[[ {true: 'Stop Drawing', false: 'Draw Camera Path'}[isDrawingPath] ]]</button>
-                                    <button class="btn btn-success btn-block" ng-disabled="boundaryRectEditable || isDrawingPath" ng-click="renderVideoWithPath()">Render Video</button>
+                                    <button class="btn btn-success btn-block" ng-disabled="boundaryRectEditable || isDrawingPath || !pathSelected" ng-click="renderVideoWithPath()">Render Video</button>
                                 </div>
                             </div>
                         </div>
