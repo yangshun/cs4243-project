@@ -8,3 +8,4 @@ STATIC_PATH = './app/static'
 
 import cube
 import campus
+import controllers
