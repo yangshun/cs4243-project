@@ -160,6 +160,22 @@ function CameraController ($scope, $http) {
       });
   }
 
+  $scope.getRenderVideoButtonState = function () {
+    var pathObject = canvas.getActiveObject();
+    return pathObject && pathObject !== boundaryRect && pathObject.path;
+  };
+
+  $scope.pathSelected = false;
+  canvas.on('object:selected', function () {
+    $scope.pathSelected = $scope.getRenderVideoButtonState();
+    $scope.$apply();
+  });
+
+  canvas.on('selection:cleared', function () {
+    $scope.pathSelected = $scope.getRenderVideoButtonState();
+    $scope.$apply();
+  });
+
   toggleDrawingPath($scope.isDrawingPath);
   toggleBoundaryRectEditing($scope.boundaryRectEditable);
   boundaryRect.set(getBoundaryRectProps());
