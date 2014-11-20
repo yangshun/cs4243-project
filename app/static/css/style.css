@@ -1,4 +1,3 @@
-#map-container {
-  height: 495px;
-  width: 828px;
+.canvas-container {
+  margin-bottom: 20px;
 }

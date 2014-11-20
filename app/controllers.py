@@ -8,6 +8,6 @@ from app import app
 def hello_world():
     return render_template('index.html')
 
-@app.route('/aerial')
+@app.route('/planview')
 def render_aerial():
-    return render_template('aerial.html')
+    return render_template('planview.html')
