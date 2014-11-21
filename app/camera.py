@@ -3,12 +3,13 @@ from math import *
 import cv2.cv as cv
 import cv2 as cv2
 from helper import *
+from surface import Surface
+
 
 # For this project, our world coordinate is defined as following
 #   x-axis      left -> right, on the ground surface
 #   y-axis      pointing into the image, on the ground surface
 #   z-axis      pointing upward to the sky
-
 class Camera(object):
     def __init__(self, focal, **kwargs):
         self.focal = focal
@@ -56,11 +57,84 @@ class Camera(object):
         v = self.v0 + self.focal * np.dot(dist, self.vertical_axis()) * self.bv / d
         return box_coord(u), box_coord(v)
 
+    def clipping_surface(self, surface):
+        top_left_dist = self.distance_to_image_plane(surface.top_left_corner3d())
+        top_right_dist = self.distance_to_image_plane(surface.top_right_corner3d())
+        bottom_right_dist = self.distance_to_image_plane(surface.bottom_right_corner3d())
+        bottom_left_dist = self.distance_to_image_plane(surface.bottom_left_corner3d())
+
+        distances = [top_left_dist, top_right_dist, bottom_right_dist, bottom_left_dist]
+
+        num_of_positive_distances = len(filter(lambda dist: dist > 0, distances))
+        if num_of_positive_distances == 0:
+            # The surface is completely behind the camera
+            return None
+
+        if num_of_positive_distances == 4:
+            # The surface is completely in front of the camera
+            return surface
+
+        # The surface is partially in front and we need to clip the surface.
+        # For simplicity, we assume that the surface go out of view in a
+        # "nice" manner. That means we can slice the visible part as a rectangle
+        # not any other polygon.
+        height, width, _ = surface.image.shape
+        x1, x2 = self._find_cut_region(top_left_dist, top_right_dist, width)
+        y1, y2 = self._find_cut_region(top_left_dist, bottom_left_dist, height)
+
+        if x1 == x2 or y1 == y2:
+            return None
+
+        # new_image = surface.image[y1:y2+1, x1:x2+1]
+        new_image = surface.image[:, x1:x2+1]
+        x_dir = (surface.top_right_corner3d() - surface.top_left_corner3d()) / width
+        y_dir = (surface.bottom_left_corner3d() - surface.top_left_corner3d()) / height
+        new_top_left_3d = surface.top_left_corner3d() + x_dir * x1 + y_dir * y1
+        new_top_right_3d = surface.top_left_corner3d() + x_dir * x2 + y_dir * y1
+        new_bottom_right_3d = surface.top_left_corner3d() + x_dir * x2 + y_dir * y2
+        new_bottom_left_3d = surface.top_left_corner3d() + x_dir * x1 + y_dir * y2
+
+        new_height, new_width, _ = new_image.shape
+        new_top_left_2d = (0, 0)
+        new_top_right_2d = (new_width, 0)
+        new_bottom_right_2d = (new_width, new_height)
+        new_bottom_left_2d = (0, new_height)
+
+        return Surface(new_image,
+                       np.array([new_top_left_3d, new_top_right_3d, new_bottom_right_3d, new_bottom_left_3d]),
+                       np.array([new_top_left_2d, new_top_right_2d, new_bottom_right_2d, new_bottom_left_2d]))
+
+    def _find_cut_region(self, left_dist, right_dist, length):
+        """
+        :param left_dist: the distance from the leftmost point to the image-plane
+        :param right_dist: the distance from the rightmost point to the image-plane
+        :param length: length from the leftmost to rightmost point
+        :return (left, right): the range from which the image should be clipped
+        """
+        if left_dist * right_dist >= 0:
+            return 0, length
+
+        cut_position = abs(left_dist) / (abs(left_dist) + abs(right_dist)) * length
+
+        if left_dist < 0:
+            return cut_position, length
+        return 0, cut_position
+
+    def distance_to_image_plane(self, point):
+        distance_wrt_camera = point - self.position
+        distance_wrt_image_plane = np.dot(distance_wrt_camera, self.optical_axis())
+        return distance_wrt_image_plane
+
     def project_surface(self, surface):
         camera_position_wrt_surface = self.position - surface.edge_points3d[0]
         if np.dot(surface.normal, camera_position_wrt_surface) <= 0:
             # camera is behind the surface
             # return None, None
+            return None
+
+        surface = self.clipping_surface(surface)
+        if surface is None:
+            # The entire surface is out of view!
             return None
 
         projected_points = []

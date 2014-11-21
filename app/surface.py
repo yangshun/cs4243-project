@@ -19,6 +19,23 @@ class Surface(object):
         self.edge_points2d = np.float32(edge_points2d)  # This is required for using cv2's getPerspectiveTransform
         self.normal = self._get_normal_vector()
 
+    def top_left_corner3d(self):
+        return self.edge_points3d[0]
+
+    def top_right_corner3d(self):
+        return self.edge_points3d[1]
+
+    def bottom_right_corner3d(self):
+        return self.edge_points3d[2]
+
+    def bottom_left_corner3d(self):
+        return self.edge_points3d[3]
+
+    def distance_to_point(self, point):
+        point_to_surface = point - self.top_left_corner3d()
+        distance_to_surface = self.normal.dot(point_to_surface)
+        return distance_to_surface
+
     def _get_normal_vector(self):
         """
         :return: the normal vector of the surface. It determined the front side

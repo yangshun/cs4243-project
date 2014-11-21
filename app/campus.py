@@ -63,7 +63,7 @@ def campus():
 
     camera_width = 970
     camera_height = 400
-    camera = Camera(DEPTH, width=970, height=400)
+    camera = Camera(DEPTH, width=camera_width, height=camera_height)
     camera_path = generate_path(data['camera_path'])
     camera_orientation = generate_camera_orientation(camera_path)
 
@@ -81,6 +81,7 @@ def campus():
     return json.dumps({ 'status': 'success', 
                         'video': {'name': file_name, 'width': camera_width, 'height': camera_height, 'src': file_path}
                     })
+
 
 def generate_path(path_points2d):
     points = []
