@@ -1,12 +1,14 @@
 var CANVAS_WIDTH = 828;
 var CANVAS_HEIGHT = 495;
 
-var BOUNDARY_RECT_TOP_LEFT_X = 51;
+var BOUNDARY_RECT_TOP_LEFT_X = 215;
 var BOUNDARY_RECT_TOP_LEFT_Y = 88;
-var BOUNDARY_RECT_BOTTOM_LEFT_X = 782;
-var BOUNDARY_RECT_BOTTOM_LEFT_Y = 382;
+var BOUNDARY_RECT_BOTTOM_LEFT_X = 700;
+var BOUNDARY_RECT_BOTTOM_LEFT_Y = 391;
 var BOUNDARY_RECT_REAL_WIDTH = 2095;
 var BOUNDARY_RECT_REAL_HEIGHT = 740;
+var BOUNDARY_RECT_FILL_SELECTED = 'rgba(0,188,140,0.2)';
+var BOUNDARY_RECT_FILL_DISABLED = 'rgba(178,74,24,0.2)';
 
 angular.module('CameraApp', []).config(function ($interpolateProvider) {
     $interpolateProvider.startSymbol('[[').endSymbol(']]');
@@ -25,7 +27,6 @@ function CameraController ($scope, $http) {
   $scope.boundaryRectEditable = false;
 
   var boundaryRect = new fabric.Rect({
-    fill: 'rgba(0,188,140,0.2)',
     lockRotation: true
   });
 
@@ -59,7 +60,7 @@ function CameraController ($scope, $http) {
     }
     boundaryRect.set({
       selectable: $scope.boundaryRectEditable,
-      fill: $scope.boundaryRectEditable ? 'rgba(0,188,140,0.2)' : 'rgba(178,74,24,0.2)',
+      fill: $scope.boundaryRectEditable ? BOUNDARY_RECT_FILL_SELECTED : BOUNDARY_RECT_FILL_DISABLED,
       hasControls: $scope.boundaryRectEditable,
       hasBorders: $scope.boundaryRectEditable
     });
