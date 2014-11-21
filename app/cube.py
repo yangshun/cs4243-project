@@ -33,8 +33,8 @@ def cube():
     space.add_model(build_cube(CUBE_SIZE/2, offset_x=CUBE_SIZE, offset_y=0, offset_z=0))
     space.add_model(build_cube(CUBE_SIZE/4, offset_x=-CUBE_SIZE, offset_y=-CUBE_SIZE, offset_z=-CUBE_SIZE/2))
 
-    # camera = Camera(500.0, width=640, height=480)
-    camera = Camera(50.0, width=100, height=100)
+    camera = Camera(500.0, width=640, height=480)
+    # camera = Camera(50.0, width=100, height=100)
     camera_path, camera_orientation = generate_path_and_orientation()
     # camera_path, camera_orientation = generate_path_and_orientation_from_higher_up()
 
@@ -100,7 +100,7 @@ def generate_path_and_orientation():
         pos_quat = pos_rot_quat * pos_quat * conj_pos_rot_quat
         path.append(pos_quat.to_vector())
 
-        orientation = np.asarray(np.dot(orientation, camera_rot_mat))
+        # orientation = np.asarray(np.dot(orientation, camera_rot_mat))
         orientations.append(orientation)
 
     return path, orientations
