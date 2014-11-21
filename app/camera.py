@@ -72,7 +72,7 @@ class Camera(object):
 
         if num_of_positive_distances == 4:
             # The surface is completely in front of the camera
-            return surface
+            return surface.image
 
         # The surface is partially in front and we need to clip the surface.
         # For simplicity, we assume that the surface go out of view in a
@@ -85,24 +85,7 @@ class Camera(object):
         if x1 == x2 or y1 == y2:
             return None
 
-        # new_image = surface.image[y1:y2+1, x1:x2+1]
-        new_image = surface.image[:, x1:x2+1]
-        x_dir = (surface.top_right_corner3d() - surface.top_left_corner3d()) / width
-        y_dir = (surface.bottom_left_corner3d() - surface.top_left_corner3d()) / height
-        new_top_left_3d = surface.top_left_corner3d() + x_dir * x1 + y_dir * y1
-        new_top_right_3d = surface.top_left_corner3d() + x_dir * x2 + y_dir * y1
-        new_bottom_right_3d = surface.top_left_corner3d() + x_dir * x2 + y_dir * y2
-        new_bottom_left_3d = surface.top_left_corner3d() + x_dir * x1 + y_dir * y2
-
-        new_height, new_width, _ = new_image.shape
-        new_top_left_2d = (0, 0)
-        new_top_right_2d = (new_width, 0)
-        new_bottom_right_2d = (new_width, new_height)
-        new_bottom_left_2d = (0, new_height)
-
-        return Surface(new_image,
-                       np.array([new_top_left_3d, new_top_right_3d, new_bottom_right_3d, new_bottom_left_3d]),
-                       np.array([new_top_left_2d, new_top_right_2d, new_bottom_right_2d, new_bottom_left_2d]))
+        return surface.image[y1:y2, x1:x2]
 
     def _find_cut_region(self, left_dist, right_dist, length):
         """
@@ -132,11 +115,6 @@ class Camera(object):
             # return None, None
             return None
 
-        surface = self.clipping_surface(surface)
-        if surface is None:
-            # The entire surface is out of view!
-            return None
-
         projected_points = []
         for point3D in surface.edge_points3d:
             projected_point_wrt_center = self.point_projection(point3D)
@@ -146,7 +124,13 @@ class Camera(object):
 
         projected_points = np.float32(projected_points)
         transform_matrix = cv2.getPerspectiveTransform(surface.edge_points2d, projected_points)
-        projected_image = cv2.warpPerspective(surface.image, transform_matrix, (self.width, self.height))
+
+        surface_image = self.clipping_surface(surface)
+        if surface_image is None:
+            # The entire surface is out of view!
+            return None
+
+        projected_image = cv2.warpPerspective(surface_image, transform_matrix, (self.width, self.height))
 
         # image_depth = self.__get_projected_image_depth(projected_image, surface)
 
