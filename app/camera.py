@@ -138,7 +138,6 @@ class Camera(object):
         return projected_image
 
     def project_surfaces(self, surfaces):
-        print "start projection"
         result_image = np.zeros((self.height, self.width, 3), np.uint8)
         result_depth = np.ones((self.height, self.width)) * np.inf
 
@@ -149,8 +148,6 @@ class Camera(object):
                 result_image = cv2.bitwise_or(result_image, projected_image)
                 # result_image, result_depth = self.__overlay_images(result_image, result_depth,
                 #                                                    projected_image, image_depth)
-
-        print "done"
         return result_image
 
     def project_polyhedron(self, polyhedron):

@@ -65,7 +65,7 @@ def campus():
     camera_height = 400
     camera = Camera(DEPTH, width=camera_width, height=camera_height)
     camera_path = generate_path(data['camera_path'])
-    camera_orientation = generate_camera_orientation(camera_path)
+    camera_orientation = generate_camera_orientation(camera_path, False)
 
     frames = []
     for camera_pos, camera_orientation in zip(camera_path, camera_orientation):
@@ -93,10 +93,30 @@ def generate_path(path_points2d):
     return points
 
 
-def generate_camera_orientation(path):
+def generate_camera_orientation(path, look_forward):
+    # Camera's horizontal axis is world's x-axis
+    # Camera's vertical axis is the opposite of the world's z-axis
+    # Camera's optical axis is the world's y-axis
     orientations = []
-    for i in range(len(path)):
-        orientations.append(np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]]))
+    if look_forward:
+        for i in range(len(path)):
+            orientations.append(np.array([[1, 0, 0], [0, 0, -1], [0, 1, 0]]))
+    else:
+        for i in range(1, len(path)):
+            optical_vector = np.array([path[i][0] - path[i-1][0], path[i][1] - path[i-1][1], 0])
+            if np.linalg.norm(optical_vector) > 0:
+                optical_vector_norm = optical_vector / np.linalg.norm(optical_vector)
+            else:
+                optical_vector_norm = optical_vector
+            angle_rad = atan2(optical_vector_norm[1], optical_vector_norm[0])
+            angle_deg = ceil(angle_rad/pi * 180)
+            optical_vector = np.array([cos(angle_deg/180 * pi), sin(angle_deg/180 * pi), 0])
+            vertical_vector = np.array([0, 0, -1])
+            horizontal_vector = np.cross(vertical_vector, optical_vector_norm)
+            orientations.append(np.array([horizontal_vector, vertical_vector, optical_vector_norm]))
+            if i == len(path):
+                # Last path point has no next point
+                orientations.append(np.array([horizontal_vector, vertical_vector, optical_vector_norm]))
     return orientations
 
 #################
