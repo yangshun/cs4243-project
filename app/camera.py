@@ -254,7 +254,7 @@ class Quaternion(object):
 
 
 def generate_video(width, height, frames, file_name, path='./app/static/video'):
-    print 'generating video'
+    print 'Generating video'
     fps = 15
     cap_size = (width, height)
     fourcc = cv.CV_FOURCC('a', 'v', 'c', '1')  # Apple's version of the MPEG4 http://www.fourcc.org/codecs.php
@@ -262,7 +262,8 @@ def generate_video(width, height, frames, file_name, path='./app/static/video'):
     writer = cv2.VideoWriter(file_path, fourcc, fps, cap_size, True)
 
     for x in range(len(frames)):
+        print 'Generating frame:', x+1, '/', len(frames)
         writer.write(frames[x])
     writer.release()
-    print 'video generated'
+    print 'Video generation complete!'
     return '/static/video/%s.mp4' % (file_name)

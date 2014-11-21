@@ -144,10 +144,10 @@ function CameraController ($scope, $http) {
           x: point[1],
           y: point[2]
         });
-        paths.push({
-          x: point[3],
-          y: point[4]
-        });
+        // paths.push({
+        //   x: point[3],
+        //   y: point[4]
+        // });
       }
     });
     var cameraPathPoints = normalizePathPoints(paths);
