@@ -120,7 +120,6 @@ def generate_camera_orientation(camera_path, look_forward):
     return orientations
 
 def smoothen_camera(camera_path, camera_angles):
-    print camera_angles
     final_path_points, final_camera_angles = [], []
     vertical_vector = np.array([0, 0, -1])
     for i in range(1, len(camera_angles)):
@@ -133,7 +132,7 @@ def smoothen_camera(camera_path, camera_angles):
             final_path_points.append(camera_path[i])
     return final_path_points, final_camera_angles
 
-NUM_LINE_SEGMENTS = 128
+NUM_LINE_SEGMENTS = 256
 
 def generate_bezier_path(points_list, order):
     num_bezier_sets = (len(points_list) - 1) / order
@@ -141,21 +140,30 @@ def generate_bezier_path(points_list, order):
     path_points = []
     for i in range(num_bezier_sets):
         p0 = points_list[i * order]
-        p1 = {}
         if i != 0:
             diff_x = p0['x'] - prev_p2['x']
             diff_y = p0['y'] - prev_p2['y']
+            diff_z = p0['z'] - prev_p2['z']
+            p1 = {}
             p1['x'] = p0['x'] + diff_x
             p1['y'] = p0['y'] + diff_y
+            p1['z'] = points_list[i * order + 1]['z']
         else:
             p1 = points_list[i * order + 1]
         p2 = points_list[i * order + 2]
         p3 = points_list[i * order + 3]
+        segment_chunk_length = NUM_LINE_SEGMENTS / 3
         for j in range(NUM_LINE_SEGMENTS + 1):
             t = float(j) / NUM_LINE_SEGMENTS
             x = ((1-t)**3)*p0['x'] + 3*((1-t)**2)*t*p1['x'] + 3*(1-t)*(t**2)*p2['x'] + (t**3)*p3['x']
             y = ((1-t)**3)*p0['y'] + 3*((1-t)**2)*t*p1['y'] + 3*(1-t)*(t**2)*p2['y'] + (t**3)*p3['y']
-            path_points.append((x, y, 30))
+            if 0 <= j < segment_chunk_length:
+                z = (p1['z']-p0['z']) * (float(j%segment_chunk_length)/segment_chunk_length) + p0['z']
+            elif segment_chunk_length <= j < 2*segment_chunk_length:
+                z = (p2['z']-p1['z']) * (float(j%segment_chunk_length)/segment_chunk_length) + p1['z']
+            elif 2*segment_chunk_length <= j:
+                z = (p3['z']-p2['z']) * (float(j%segment_chunk_length)/segment_chunk_length) + p2['z']
+            path_points.append((x, y, z))
         prev_p2 = p2
     return path_points
 
