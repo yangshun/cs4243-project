@@ -63,10 +63,11 @@ def campus():
 
     camera_width = 970
     camera_height = 400
-    camera = Camera(DEPTH, width=camera_width, height=camera_height)
+    camera = Camera(DEPTH/2, width=camera_width, height=camera_height)
     camera_path = generate_path(data['camera_path'])
-
+    camera_path = generate_bezier_path([{'x':-200, 'y':-1900}, {'x':100, 'y':-1700}, {'x':100, 'y':-1000}, {'x':-200, 'y':-80}], 3)
     look_forward = False
+
     camera_orientation = generate_camera_orientation(camera_path, look_forward)
     if not look_forward:
         camera_path, camera_orientation = smoothen_camera(camera_path[3:], camera_orientation[3:])
@@ -131,6 +132,32 @@ def smoothen_camera(camera_path, camera_angles):
             final_camera_angles.append(np.array([horizontal_vector, vertical_vector, optical_vector]))
             final_path_points.append(camera_path[i])
     return final_path_points, final_camera_angles
+
+NUM_LINE_SEGMENTS = 256
+
+def generate_bezier_path(points_list, order):
+    num_bezier_sets = (len(points_list) - 1) / order
+    prev_p2 = {}
+    path_points = []
+    for i in range(num_bezier_sets):
+        p0 = points_list[i * order]
+        p1 = {}
+        if i != 0:
+            diff_x = p0['x'] - prev_p2['x']
+            diff_y = p0['y'] - prev_p2['y']
+            p1['x'] = p0['x'] + diff_x
+            p1['y'] = p0['y'] + diff_y
+        else:
+            p1 = points_list[i * order + 1]
+        p2 = points_list[i * order + 2]
+        p3 = points_list[i * order + 3]
+        for j in range(NUM_LINE_SEGMENTS + 1):
+            t = float(j) / NUM_LINE_SEGMENTS
+            x = ((1-t)**3)*p0['x'] + 3*((1-t)**2)*t*p1['x'] + 3*(1-t)*(t**2)*p2['x'] + (t**3)*p3['x']
+            y = ((1-t)**3)*p0['y'] + 3*((1-t)**2)*t*p1['y'] + 3*(1-t)*(t**2)*p2['y'] + (t**3)*p3['y']
+            path_points.append((x, y, 30))
+        prev_p2 = p2
+    return path_points
 
 #################
 # OLD CODE!!!!
