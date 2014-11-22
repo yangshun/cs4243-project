@@ -37,7 +37,25 @@
                             <div class="row">
                                 <div class="col-md-9">
                                     <canvas id="map-container"></canvas>
-                                    <div class="alert alert-info" role="alert">Draw the camera path of the camera.</div>
+                                    <table class="table table-striped table-hover">
+                                        <tr>
+                                            <th>Point</th>
+                                            <th>X</th>
+                                            <th>Y</th>
+                                            <th>Z</th>
+                                            <th></th>
+                                        </tr>
+                                        <tr ng-repeat="pt in pathPoints track by $index">
+                                            <td>[[$index+1]]</td>
+                                            <td>[[ normalizePathPoint(pt.point).x ]]</td>
+                                            <td>[[ normalizePathPoint(pt.point).y ]]</td>
+                                            <td><input class="z-value" type="number" ng-model="pt.point.z"></td>
+                                            <td><button class="btn btn-warning btn-xs" ng-click="deletePoint($index)">Delete Point</button></td>
+                                        </tr>
+                                        <tr ng-show="pathPoints.length === 0">
+                                            <td colspan="5">No points selected yet</td>
+                                        </tr>
+                                    </table>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="panel panel-default">
@@ -75,9 +93,19 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <button class="btn btn-block [[ {true: 'btn-danger', false: 'btn-warning'}[isDrawingPath] ]]" ng-disabled="boundaryRectEditable" ng-click="toggleDrawingPath()">[[ {true: 'Stop Drawing', false: 'Draw Camera Path'}[isDrawingPath] ]]</button>
-                                    <button class="btn btn-info btn-block" ng-disabled="boundaryRectEditable || isDrawingPath || !pathSelected || renderingVideo" ng-click="renderVideoWithPath()">Create Video</button>
-                                    <span ng-show="renderingVideo">Rendering...</span>
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Video Rendering</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" ng-model="cameraLookingForward"> Camera looks forward
+                                                </label>
+                                            </div>
+                                            <button class="btn btn-info btn-block" ng-disabled="boundaryRectEditable || pathPoints.length < 4 || renderingVideo" ng-click="renderVideoWithPath()">Create Video</button>
+                                        <span ng-show="renderingVideo">Rendering...</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -63,13 +63,13 @@ def campus():
 
     camera_width = 970
     camera_height = 400
+    BEZIER_PATH_ORDER = 3
     camera = Camera(DEPTH/2, width=camera_width, height=camera_height)
-    camera_path = generate_path(data['camera_path'])
-    camera_path = generate_bezier_path([{'x':-200, 'y':-1900}, {'x':100, 'y':-1700}, {'x':100, 'y':-1000}, {'x':-200, 'y':-80}], 3)
-    look_forward = False
+    camera_path = generate_bezier_path(data['camera_path'], BEZIER_PATH_ORDER)
+    camera_looking_forward = data['camera_looking_forward']
 
-    camera_orientation = generate_camera_orientation(camera_path, look_forward)
-    if not look_forward:
+    camera_orientation = generate_camera_orientation(camera_path, camera_looking_forward)
+    if not camera_looking_forward:
         camera_path, camera_orientation = smoothen_camera(camera_path[3:], camera_orientation[3:])
         
     frames = []
@@ -91,7 +91,7 @@ def generate_path(path_points2d):
     points = []
 
     for point2d in path_points2d:
-        point3d = (point2d['x'], point2d['y'], 30)
+        point3d = (point2d['x'], point2d['y'], point2d['z'])
         points.append(point3d)
 
     return points
@@ -133,7 +133,7 @@ def smoothen_camera(camera_path, camera_angles):
             final_path_points.append(camera_path[i])
     return final_path_points, final_camera_angles
 
-NUM_LINE_SEGMENTS = 256
+NUM_LINE_SEGMENTS = 128
 
 def generate_bezier_path(points_list, order):
     num_bezier_sets = (len(points_list) - 1) / order
