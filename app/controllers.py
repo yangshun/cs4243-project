@@ -5,6 +5,6 @@ from app import app
 
 
 @app.route('/')
-def render_planview():
-    return render_template('planview.html')
+def index():
+    return render_template('index.html')
 
