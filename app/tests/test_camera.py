@@ -96,8 +96,8 @@ class TestCamera(TestCase):
         surface = Surface(self.image, edge_3dpoints, self.edge_2dpoints)
 
         self.camera.position = np.array([0, -51, 0])
-        clipped_surface = self.camera.clipping_surface(surface)
-        clipped_height, clipped_width, _ = clipped_surface.image.shape
+        clipped_image = self.camera.clipping_surface(surface)
+        clipped_height, clipped_width, _ = clipped_image.shape
         self.assertAlmostEqual(clipped_height, 200)
         self.assertAlmostEqual(clipped_width, 200)
 
@@ -107,9 +107,9 @@ class TestCamera(TestCase):
         surface = Surface(self.image, edge_3dpoints, self.edge_2dpoints)
 
         self.camera.position = np.array([0, 50, 0])
-        clipped_surface = self.camera.clipping_surface(surface)
+        clipped_image = self.camera.clipping_surface(surface)
 
-        self.assertIsNone(clipped_surface)
+        self.assertIsNone(clipped_image)
 
     def testClippingSurface_partially_clipped(self):
         edge_3dpoints = np.array([(-SIZE/2, -SIZE/2, SIZE/2), (-SIZE/2, SIZE/2, SIZE/2),
@@ -117,7 +117,7 @@ class TestCamera(TestCase):
         surface = Surface(self.image, edge_3dpoints, self.edge_2dpoints)
 
         self.camera.position = np.array([0, 0, 0])
-        clipped_surface = self.camera.clipping_surface(surface)
-        clipped_height, clipped_width, _ = clipped_surface.image.shape
+        clipped_image = self.camera.clipping_surface(surface)
+        clipped_height, clipped_width, _ = clipped_image.shape
         self.assertAlmostEqual(clipped_height, 200)
-        self.assertAlmostEqual(clipped_width, 100)
+        self.assertAlmostEqual(clipped_width, 200)

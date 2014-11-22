@@ -3,7 +3,7 @@ from math import *
 import cv2.cv as cv
 import cv2 as cv2
 from helper import *
-from surface import Surface
+from surface import Surface, Line2D
 
 
 # For this project, our world coordinate is defined as following
@@ -87,9 +87,6 @@ class Camera(object):
         right_y1, right_y2 = self._find_cut_region(top_right_dist, bottom_right_dist, height)
         y1 = min(left_y1, right_y1)
         y2 = max(left_y2, right_y2)
-
-        if x1 == x2 or y1 == y2:
-            return None
 
         clipped_image = np.zeros_like(surface.image)
         clipped_image[y1:y2, x1:x2] = surface.image[y1:y2, x1:x2]
@@ -271,7 +268,6 @@ def generate_video(width, height, frames, file_name, path='./app/static/video'):
     writer = cv2.VideoWriter(file_path, fourcc, fps, cap_size, True)
 
     for x in range(len(frames)):
-        print 'Generating frame:', x+1, '/', len(frames)
         writer.write(frames[x])
     writer.release()
     print 'Video generation complete!'
