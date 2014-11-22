@@ -79,8 +79,14 @@ class Camera(object):
         # "nice" manner. That means we can slice the visible part as a rectangle
         # not any other polygon.
         height, width, _ = surface.image.shape
-        x1, x2 = self._find_cut_region(top_left_dist, top_right_dist, width)
-        y1, y2 = self._find_cut_region(top_left_dist, bottom_left_dist, height)
+        top_x1, top_x2 = self._find_cut_region(top_left_dist, top_right_dist, width)
+        bottom_x1, bottom_x2 = self._find_cut_region(bottom_left_dist, bottom_right_dist, width)
+        x1 = min(top_x1, bottom_x1)
+        x2 = max(top_x2, bottom_x2)
+        left_y1, left_y2 = self._find_cut_region(top_left_dist, bottom_left_dist, height)
+        right_y1, right_y2 = self._find_cut_region(top_right_dist, bottom_right_dist, height)
+        y1 = min(left_y1, right_y1)
+        y2 = max(left_y2, right_y2)
 
         if x1 == x2 or y1 == y2:
             return None
