@@ -10,6 +10,14 @@ var BOUNDARY_RECT_REAL_HEIGHT = 740;
 var BOUNDARY_RECT_FILL_SELECTED = 'rgba(0,188,140,0.2)';
 var BOUNDARY_RECT_FILL_DISABLED = 'rgba(178,74,24,0.2)';
 
+var POINT_RADIUS = 5;
+var POINT_FILL_COLOR = 'red';
+var POINT_LABEL_FONT = 'sans-serif';
+var POINT_LABEL_FONT_SIZE = 14;
+var POINT_LABEL_FONT_WEIGHT = 'bold';
+
+var CAMERA_DEFAULT_HEIGHT = 40;
+
 angular.module('CameraApp', []).config(function ($interpolateProvider) {
     $interpolateProvider.startSymbol('[[').endSymbol(']]');
 });
@@ -55,9 +63,6 @@ function CameraController ($scope, $http) {
 
   function toggleBoundaryRectEditing (state) {
     $scope.boundaryRectEditable = typeof state !== 'undefined' ? state : !$scope.boundaryRectEditable;
-    if ($scope.boundaryRectEditable) {
-      toggleDrawingPath(false);
-    }
     boundaryRect.set({
       selectable: $scope.boundaryRectEditable,
       fill: $scope.boundaryRectEditable ? BOUNDARY_RECT_FILL_SELECTED : BOUNDARY_RECT_FILL_DISABLED,
@@ -72,89 +77,84 @@ function CameraController ($scope, $http) {
     canvas.renderAll();
   };
 
-  $scope.isDrawingPath = false;
+  $scope.pathPoints = [];
 
-  function toggleDrawingPath (state) {
-    $scope.isDrawingPath = typeof state !== 'undefined' ? state: !$scope.isDrawingPath;
-    if ($scope.isDrawingPath) {
-      toggleBoundaryRectEditing(false);
-    } else {
-      canvas.getObjects().filter(function (obj) {
-        return !!obj.path;
-      }).forEach(function (obj) {
-        obj.set({
-          lockMovementX: true,
-          lockMovementY: true,
-          lockRotation: true,
-          lockScalingX: true,
-          lockScalingY: true
-        });
-      });
+  canvas.on('mouse:down', function(options) {
+    if ($scope.boundaryRectEditable) {
+      // Prevent point from being added when editing boundary rect
+      return;
     }
-    canvas.isDrawingMode = $scope.isDrawingPath;
+
+    var point = options.e;
+
+    var circle = new fabric.Circle({
+      radius: POINT_RADIUS, 
+      fill: POINT_FILL_COLOR, 
+      left: point.offsetX - POINT_RADIUS,
+      top: point.offsetY - POINT_RADIUS,
+      selectable: false
+    });
+    circle.z = CAMERA_DEFAULT_HEIGHT; // Set default z-value for video;
+
+    var label = new fabric.Text(($scope.pathPoints.length + 1).toString(), {
+      fontWeight: POINT_LABEL_FONT_WEIGHT,
+      fontSize: POINT_LABEL_FONT_SIZE,
+      fontFamily: POINT_LABEL_FONT,
+      left: point.offsetX - POINT_RADIUS/2,
+      top: point.offsetY + POINT_RADIUS,
+    });
+    $scope.pathPoints.push({
+      point: circle,
+      label: label
+    })
+    canvas.add(circle);
+    canvas.add(label);
+    $scope.$apply();
+  });
+
+  $scope.deletePoint = function (index) {
+    var pt = $scope.pathPoints[index];
+    canvas.remove(pt.point);
+    canvas.remove(pt.label);
+    $scope.pathPoints.splice(index, 1);
+    for (var i = 0; i < $scope.pathPoints.length; i++) {
+      $scope.pathPoints[i].label.setText((i+1).toString());
+    }
     canvas.renderAll();
   }
 
-  $('html').keydown(function (e) {
-    if (e.keyCode == 8) {
-      var pathObject = canvas.getActiveObject();
-      if (pathObject && pathObject !== boundaryRect && pathObject.path) {
-        e.preventDefault();
-        canvas.fxRemove(pathObject);
-      }
-    }
-  });
-
-  $('input').focus(function () {
-    canvas.deactivateAll().renderAll();
-  });
+  $scope.normalizePathPoint = function (point) {
+    var x = point.left - $scope.topLeft.x;
+    var y = point.top - $scope.topLeft.y;
+    var boundaryBoxX = x;
+    var boundaryBoxY = y;
+    return {
+      x: Math.round(((-boundaryBoxY/boundaryRect.currentHeight) + 0.5) * $scope.boundaryHeight, 2),
+      y: Math.round(-boundaryBoxX/boundaryRect.currentWidth * $scope.boundaryWidth, 2),
+      z: point.z 
+    };
+  }
 
   function normalizePathPoints (pathPoints) {
-    pathPoints.forEach(function (point) {
+    return pathPoints.map(function (point) {
       // Map to boundary box coordinates
-      point.x -= $scope.topLeft.x;
-      point.y -= $scope.topLeft.y;
+      return $scope.normalizePathPoint(point);
     });
-    pathPoints.forEach(function (point) {
-      // Map to camera coordinates
-      var boundaryBoxX = point.x;
-      var boundaryBoxY = point.y;
-      point.x = Math.round(((-boundaryBoxY/boundaryRect.currentHeight) + 0.5) * $scope.boundaryHeight, 2);
-      point.y = Math.round(-boundaryBoxX/boundaryRect.currentWidth * $scope.boundaryWidth, 2);
-    });
-    return pathPoints;
   }
 
   $scope.renderingVideo = false;
+  $scope.cameraLookingForward = false;
+
   $scope.renderVideoWithPath = function () {
-    var pathObject = canvas.getActiveObject();
-    if (!pathObject) {
-      alert('You must select one camera path!');
-      return;
-    }
-    var paths = [];
-    pathObject.path.forEach(function (point) {
-      if (point.length === 3) {
-        paths.push({
-          x: point[1],
-          y: point[2]
-        });
-      } else if (point.length === 5) {
-        paths.push({
-          x: point[1],
-          y: point[2]
-        });
-        // paths.push({
-        //   x: point[3],
-        //   y: point[4]
-        // });
-      }
+    var pathPoints = $scope.pathPoints.map(function (pt) {
+      return pt.point;
     });
-    var cameraPathPoints = normalizePathPoints(paths);
+    var cameraPathPoints = normalizePathPoints(pathPoints);
 
     $scope.renderingVideo = true;
     $http.post('/generate_video', {
       camera_path: cameraPathPoints,
+      camera_looking_forward: $scope.cameraLookingForward,
       file_name: new Date().getTime()
     }).success(function (res, status, headers, config) {
       if (res.status === 'success') {
@@ -177,23 +177,10 @@ function CameraController ($scope, $http) {
     return pathObject && pathObject !== boundaryRect && pathObject.path;
   };
 
-  $scope.pathSelected = false;
-  canvas.on('object:selected', function () {
-    $scope.pathSelected = $scope.getRenderVideoButtonState();
-    $scope.$apply();
-  });
-
-  canvas.on('selection:cleared', function () {
-    $scope.pathSelected = $scope.getRenderVideoButtonState();
-    $scope.$apply();
-  });
-
-  toggleDrawingPath($scope.isDrawingPath);
   toggleBoundaryRectEditing($scope.boundaryRectEditable);
   boundaryRect.set(getBoundaryRectProps());
 
   $scope.toggleBoundaryRectEditing = toggleBoundaryRectEditing;
-  $scope.toggleDrawingPath = toggleDrawingPath;
 
   fabric.Image.fromURL('/static/img/aerial-view.jpg', function (img) {
     img.set('selectable', false);
