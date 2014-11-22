@@ -155,7 +155,14 @@ function CameraController ($scope, $http) {
     $scope.renderingVideo = true;
     $http.post('/generate_video', {
       camera_path: cameraPathPoints,
-      file_name: new Date().getTime()
+      file_name: new Date().getTime(),
+      world: world,
+      planeRect: {
+        x: parseInt($scope.planeTopLeft.x * 1/scale),
+        y: parseInt($scope.planeTopLeft.y * 1/scale),
+        width: parseInt(($scope.planeBottomRight.x - $scope.planeTopLeft.x) * 1/scale),
+        height: parseInt(($scope.planeBottomRight.y - $scope.planeTopLeft.y) * 1/scale)
+      }
     }).success(function (res, status, headers, config) {
       if (res.status === 'success') {
         $scope.renderingVideo = false;
@@ -204,6 +211,7 @@ function CameraController ($scope, $http) {
   });
 
   var img = new Image();
+  var scale;
   img.src = '/static/img/cmu-ece.jpg';
   img.onload = function () {
     var imgWidth = this.width;
@@ -211,7 +219,8 @@ function CameraController ($scope, $http) {
     fabric.Image.fromURL('/static/img/cmu-ece.jpg', function (img) {
       img.set('selectable', false);
       img.set('width', CANVAS_WIDTH);
-      var canvasHeight = CANVAS_WIDTH/imgWidth * imgHeight; 
+      scale = CANVAS_WIDTH/imgWidth;
+      var canvasHeight = scale * imgHeight; 
       img.set('height', canvasHeight);
 
       imageCanvas = new fabric.Canvas('image-container', {
@@ -265,7 +274,7 @@ function CameraController ($scope, $http) {
     return {
       width: $scope.planeBottomRight.x - $scope.planeTopLeft.x, 
       height: $scope.planeBottomRight.y - $scope.planeTopLeft.y,
-      left: $scope.planeTopLeft.x, 
+      left: $scope.planeTopLeft.x,
       top: $scope.planeTopLeft.y
     };
   }
@@ -276,8 +285,8 @@ function CameraController ($scope, $http) {
   };
 
   $scope.world = {
-    width: 0,
-    height: 0,
-    depth: 0
+    width: 741,
+    height: 304,
+    depth: 2095
   };
 }

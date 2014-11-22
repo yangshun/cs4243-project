@@ -64,17 +64,17 @@
                                                             <label class="control-label">Top Left</label>
                                                             <div class="input-group">
                                                                 <div class="input-group-addon">X</div>
-                                                                <input type="text" class="form-control" ng-model="planeTopLeft.x" ng-blur="renderPlaneCanvas()">
+                                                                <input type="number" class="form-control" ng-model="planeTopLeft.x" ng-blur="renderPlaneCanvas()">
                                                                 <div class="input-group-addon">Y</div>
-                                                                <input type="text" class="form-control" ng-model="planeTopLeft.y" ng-blur="renderPlaneCanvas()">
+                                                                <input type="number" class="form-control" ng-model="planeTopLeft.y" ng-blur="renderPlaneCanvas()">
                                                             </div>
                                                             <br>
                                                             <label class="control-label">Bottom Right</label>
                                                             <div class="input-group">
                                                                 <div class="input-group-addon">X</div>
-                                                                <input type="text" class="form-control" ng-model="planeBottomRight.x" ng-blur="renderPlaneCanvas()">
+                                                                <input type="number" class="form-control" ng-model="planeBottomRight.x" ng-blur="renderPlaneCanvas()">
                                                                 <div class="input-group-addon">Y</div>
-                                                                <input type="text" class="form-control" ng-model="planeBottomRight.y" ng-blur="renderPlaneCanvas()">
+                                                                <input type="number" class="form-control" ng-model="planeBottomRight.y" ng-blur="renderPlaneCanvas()">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -87,9 +87,9 @@
                                                         <div class="form-group">
                                                             <div class="input-group">
                                                                 <div class="input-group-addon">X</div>
-                                                                <input type="text" class="form-control" ng-model="vanishingPoint.left" ng-blur="renderPlaneCanvas()">
+                                                                <input type="number" class="form-control" ng-model="vanishingPoint.left" ng-blur="renderPlaneCanvas()">
                                                                 <div class="input-group-addon">Y</div>
-                                                                <input type="text" class="form-control" ng-model="vanishingPoint.top" ng-blur="renderPlaneCanvas()">
+                                                                <input type="number" class="form-control" ng-model="vanishingPoint.top" ng-blur="renderPlaneCanvas()">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -102,19 +102,19 @@
                                                         <div class="form-group">
                                                             <label for="world-width" class="col-sm-4 control-label">Width</label>
                                                             <div class="col-sm-8">
-                                                                <input type="text" class="form-control" id="world-width" placeholder="Width" ng-model="world.width">
+                                                                <input type="number" class="form-control" id="world-width" placeholder="Width" ng-model="world.width">
                                                             </div>
                                                         </div>
                                                         <div class="form-group">
                                                             <label for="world-width" class="col-sm-4 control-label">Height</label>
                                                             <div class="col-sm-8">
-                                                                <input type="text" class="form-control" id="world-height" placeholder="Height" ng-model="world.height">
+                                                                <input type="number" class="form-control" id="world-height" placeholder="Height" ng-model="world.height">
                                                             </div>
                                                         </div>
                                                         <div class="form-group">
                                                             <label for="world-width" class="col-sm-4 control-label">Depth</label>
                                                             <div class="col-sm-8">
-                                                                <input type="text" class="form-control" id="world-depth" placeholder="Depth" ng-model="world.depth">
+                                                                <input type="number" class="form-control" id="world-depth" placeholder="Depth" ng-model="world.depth">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -163,17 +163,17 @@
                                                             <label class="control-label">Top Left</label>
                                                             <div class="input-group">
                                                                 <div class="input-group-addon">X</div>
-                                                                <input type="text" class="form-control" placeholder="Top Left X" ng-model="topLeft.x" ng-blur="renderBoundaryRect()">
+                                                                <input type="number" class="form-control" placeholder="Top Left X" ng-model="topLeft.x" ng-blur="renderBoundaryRect()">
                                                                 <div class="input-group-addon">Y</div>
-                                                                <input type="text" class="form-control" placeholder="Top Left Y" ng-model="topLeft.y" ng-blur="renderBoundaryRect()">
+                                                                <input type="number" class="form-control" placeholder="Top Left Y" ng-model="topLeft.y" ng-blur="renderBoundaryRect()">
                                                             </div>
                                                             <br>
                                                             <label class="control-label">Bottom Right</label>
                                                             <div class="input-group">
                                                                 <div class="input-group-addon">X</div>
-                                                                <input type="text" class="form-control" placeholder="Bottom Right X" ng-model="bottomRight.x" ng-blur="renderBoundaryRect()">
+                                                                <input type="number" class="form-control" placeholder="Bottom Right X" ng-model="bottomRight.x" ng-blur="renderBoundaryRect()">
                                                                 <div class="input-group-addon">Y</div>
-                                                                <input type="text" class="form-control" placeholder="Bottom Right Y" ng-model="bottomRight.y" ng-blur="renderBoundaryRect()">
+                                                                <input type="number" class="form-control" placeholder="Bottom Right Y" ng-model="bottomRight.y" ng-blur="renderBoundaryRect()">
                                                             </div>
                                                             <br>
                                                             <button class="btn [[ {true: 'btn-danger', false: 'btn-success'}[boundaryRectEditable] ]]" ng-disabled="isDrawingPath" ng-click="toggleBoundaryRectEditing()">[[ {true: 'Stop Editing', false: 'Edit Boundary Rectangle'}[boundaryRectEditable] ]]</button>
@@ -182,9 +182,9 @@
                                                             <label class="control-label">Real World Boundary Box Dimensions</label>
                                                             <div class="input-group">
                                                                 <div class="input-group-addon">W</div>
-                                                                <input type="text" class="form-control" placeholder="Width" ng-model="boundaryWidth">
+                                                                <input type="number" class="form-control" placeholder="Width" ng-model="boundaryWidth">
                                                                 <div class="input-group-addon">H</div>
-                                                                <input type="text" class="form-control" placeholder="Height" ng-model="boundaryHeight">
+                                                                <input type="number" class="form-control" placeholder="Height" ng-model="boundaryHeight">
                                                             </div>
                                                         </div>
                                                     </div>
