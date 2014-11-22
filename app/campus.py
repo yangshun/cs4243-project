@@ -67,7 +67,6 @@ def campus():
     camera = Camera(DEPTH/2, width=camera_width, height=camera_height)
     camera_path, camera_angles = generate_bezier_path_and_orientations(data['camera_path'], BEZIER_PATH_ORDER)
     filtered_camera_path, filtered_camera_angles = [], []
-    print camera_angles
     for i in range(len(camera_path)):
         if int(camera_angles[i]) != 0:
             filtered_camera_path.append(camera_path[i])
@@ -143,8 +142,18 @@ def smoothen_camera(camera_path, camera_angles):
     vertical_vector = np.array([0, 0, -1])
     for i in range(1, len(camera_angles)):
         step = 1 if camera_angles[i] > camera_angles[i-1] else -1
+        start_range = int(camera_angles[i-1])
         end_range = (int(camera_angles[i]) + 1) if (int(camera_angles[i-1]) - int(camera_angles[i]) == 0) else int(camera_angles[i])
-        for angle_deg in range(int(camera_angles[i-1]), end_range, step):
+        if abs(camera_angles[i] - camera_angles[i-1]) > 180:
+            if camera_angles[i] > camera_angles[i-1]:
+                start_range += 360
+                end_range = int(camera_angles[i])
+                step = -1
+            else:
+                start_range = int(camera_angles[i]) + 360
+                end_range = int(camera_angles[i-1])
+                step = 1
+        for angle_deg in range(start_range, end_range, step):
             optical_vector = np.array([cos(float(angle_deg)/180 * pi), sin(float(angle_deg)/180 * pi), 0])
             horizontal_vector = np.cross(vertical_vector, optical_vector)
             final_camera_angles.append(np.array([horizontal_vector, vertical_vector, optical_vector]))
