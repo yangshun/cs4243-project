@@ -11,7 +11,6 @@ from surface import Surface, Polyhedron, Space
 
 CAMPUS_IMAGE_PATH = STATIC_PATH + '/campus'
 
-
 WIDTH = 741
 HEIGHT = 304
 DEPTH = 2095

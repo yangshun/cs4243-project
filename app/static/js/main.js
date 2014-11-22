@@ -23,7 +23,9 @@ angular.module('CameraApp', []).config(function ($interpolateProvider) {
 });
 
 function CameraController ($scope, $http) {
-  canvas = new fabric.Canvas('map-container', {
+
+  // Plan view slicing
+  planViewCanvas = new fabric.Canvas('map-container', {
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT
   });
@@ -47,7 +49,7 @@ function CameraController ($scope, $http) {
     }
   }
 
-  canvas.on('object:modified', function (object) {
+  planViewCanvas.on('object:modified', function (object) {
     if (object.target === boundaryRect) {
       updateBoundaryRect(object.target);
     }
@@ -69,17 +71,17 @@ function CameraController ($scope, $http) {
       hasControls: $scope.boundaryRectEditable,
       hasBorders: $scope.boundaryRectEditable
     });
-    canvas.renderAll();
+    planViewCanvas.renderAll();
   };
 
   $scope.renderBoundaryRect = function () {
     boundaryRect.set(getBoundaryRectProps());
-    canvas.renderAll();
+    planViewCanvas.renderAll();
   };
 
   $scope.pathPoints = [];
 
-  canvas.on('mouse:down', function(options) {
+  planViewCanvas.on('mouse:down', function(options) {
     if ($scope.boundaryRectEditable) {
       // Prevent point from being added when editing boundary rect
       return;
@@ -107,20 +109,20 @@ function CameraController ($scope, $http) {
       point: circle,
       label: label
     })
-    canvas.add(circle);
-    canvas.add(label);
+    planViewCanvas.add(circle);
+    planViewCanvas.add(label);
     $scope.$apply();
   });
 
   $scope.deletePoint = function (index) {
     var pt = $scope.pathPoints[index];
-    canvas.remove(pt.point);
-    canvas.remove(pt.label);
+    planViewCanvas.remove(pt.point);
+    planViewCanvas.remove(pt.label);
     $scope.pathPoints.splice(index, 1);
     for (var i = 0; i < $scope.pathPoints.length; i++) {
       $scope.pathPoints[i].label.setText((i+1).toString());
     }
-    canvas.renderAll();
+    planViewCanvas.renderAll();
   }
 
   $scope.normalizePathPoint = function (point) {
@@ -143,7 +145,6 @@ function CameraController ($scope, $http) {
   }
 
   $scope.renderingVideo = false;
-  $scope.cameraLookingForward = false;
 
   $scope.renderVideoWithPath = function () {
     var pathPoints = $scope.pathPoints.map(function (pt) {
@@ -154,7 +155,6 @@ function CameraController ($scope, $http) {
     $scope.renderingVideo = true;
     $http.post('/generate_video', {
       camera_path: cameraPathPoints,
-      camera_looking_forward: $scope.cameraLookingForward,
       file_name: new Date().getTime()
     }).success(function (res, status, headers, config) {
       if (res.status === 'success') {
@@ -173,7 +173,7 @@ function CameraController ($scope, $http) {
   }
 
   $scope.getRenderVideoButtonState = function () {
-    var pathObject = canvas.getActiveObject();
+    var pathObject = planViewCanvas.getActiveObject();
     return pathObject && pathObject !== boundaryRect && pathObject.path;
   };
 
@@ -184,7 +184,100 @@ function CameraController ($scope, $http) {
 
   fabric.Image.fromURL('/static/img/aerial-view.jpg', function (img) {
     img.set('selectable', false);
-    canvas.add(img);
-    canvas.add(boundaryRect);
+    planViewCanvas.add(img);
+    planViewCanvas.add(boundaryRect);
   });
+
+  // Plane slicing section
+  imageCanvas = null;
+
+  $scope.planeTopLeft = {x: 198, y: 225};
+  $scope.planeBottomRight = {x: 198+378, y: 225+226};
+
+  var planeBoundaryRect = new fabric.Rect({
+    lockRotation: true,
+    top: 225,
+    left: 198,
+    width: 378,
+    height: 226,
+    fill: 'rgba(178,74,24,0.5)'
+  });
+
+  var img = new Image();
+  img.src = '/static/img/cmu-ece.jpg';
+  img.onload = function () {
+    var imgWidth = this.width;
+    var imgHeight = this.height;
+    fabric.Image.fromURL('/static/img/cmu-ece.jpg', function (img) {
+      img.set('selectable', false);
+      img.set('width', CANVAS_WIDTH);
+      var canvasHeight = CANVAS_WIDTH/imgWidth * imgHeight; 
+      img.set('height', canvasHeight);
+
+      imageCanvas = new fabric.Canvas('image-container', {
+        width: CANVAS_WIDTH,
+        height: canvasHeight
+      });
+      imageCanvas.add(img);
+      imageCanvas.add(planeBoundaryRect);
+      
+      $scope.vanishingPoint = new fabric.Circle({
+        radius: 5, 
+        fill: POINT_FILL_COLOR,
+        left: 335,
+        top: 415.5,
+        lockScalingX: true,
+        lockScalingY: true
+      });
+
+      $scope.vanishingPoint.setControlsVisibility({
+        bl: false,
+        br: false,
+        mb: false,
+        ml: false,
+        mr: false,
+        mt: false,
+        tl: false,
+        tr: false,
+        mtr: false
+      })
+      imageCanvas.add($scope.vanishingPoint);
+
+      imageCanvas.on('object:modified', function (object) {
+        if (object.target === planeBoundaryRect) {
+          updatePlaneBoundaryRect(object.target);
+        }
+        $scope.$apply();
+      });
+      $scope.renderPlaneCanvas();
+      $scope.$apply();
+    });
+  };
+
+  function updatePlaneBoundaryRect (rect) {
+    $scope.planeTopLeft.x = Math.round(rect.left);
+    $scope.planeTopLeft.y = Math.round(rect.top);
+    $scope.planeBottomRight.x = Math.round(rect.left + rect.currentWidth);
+    $scope.planeBottomRight.y = Math.round(rect.top + rect.currentHeight);
+  }
+
+  function getPlaneBoundaryRectProps () {
+    return {
+      width: $scope.planeBottomRight.x - $scope.planeTopLeft.x, 
+      height: $scope.planeBottomRight.y - $scope.planeTopLeft.y,
+      left: $scope.planeTopLeft.x, 
+      top: $scope.planeTopLeft.y
+    };
+  }
+
+  $scope.renderPlaneCanvas = function () {
+    planeBoundaryRect.set(getPlaneBoundaryRectProps());
+    imageCanvas.renderAll();
+  };
+
+  $scope.world = {
+    width: 0,
+    height: 0,
+    depth: 0
+  };
 }

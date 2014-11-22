@@ -11,5 +11,24 @@
 }
 
 .z-value {
-  width: 50px;
+  height: 30px;
+  padding: 5px;
+  text-align: center;
+  width: 60px;
+}
+
+.tab-pane {
+  padding: 10px;
+}
+
+body {
+  padding-top: 20px;
+}
+
+.input-group-addon {
+  padding: 5px;
+}
+
+.world-coordinates input {
+  width: 40px;
 }
