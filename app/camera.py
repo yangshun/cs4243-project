@@ -3,7 +3,7 @@ from math import *
 import cv2.cv as cv
 import cv2 as cv2
 from helper import *
-from surface import Surface
+from surface import Surface, Line2D
 
 
 # For this project, our world coordinate is defined as following
@@ -81,18 +81,31 @@ class Camera(object):
         height, width, _ = surface.image.shape
         top_x1, top_x2 = self._find_cut_region(top_left_dist, top_right_dist, width)
         bottom_x1, bottom_x2 = self._find_cut_region(bottom_left_dist, bottom_right_dist, width)
-        x1 = min(top_x1, bottom_x1)
-        x2 = max(top_x2, bottom_x2)
+        # x1 = min(top_x1, bottom_x1)
+        # x2 = max(top_x2, bottom_x2)
         left_y1, left_y2 = self._find_cut_region(top_left_dist, bottom_left_dist, height)
         right_y1, right_y2 = self._find_cut_region(top_right_dist, bottom_right_dist, height)
-        y1 = min(left_y1, right_y1)
-        y2 = max(left_y2, right_y2)
+        # y1 = min(left_y1, right_y1)
+        # y2 = max(left_y2, right_y2)
 
-        if x1 == x2 or y1 == y2:
-            return None
+        top_left_corner = np.array([top_x1, left_y1])
+        top_right_corner = np.array([top_x2, right_y1])
+        bottom_right_corner = np.array([bottom_x2, right_y2])
+        bottom_left_corner = np.array([bottom_x1, left_y2])
+        top_edge = Line2D(top_left_corner, top_right_corner)
+        right_edge = Line2D(top_right_corner, bottom_right_corner)
+        bottom_edge = Line2D(bottom_right_corner, bottom_left_corner)
+        left_edge = Line2D(bottom_left_corner, top_left_corner)
 
-        clipped_image = np.zeros_like(surface.image)
-        clipped_image[y1:y2, x1:x2] = surface.image[y1:y2, x1:x2]
+        clipped_image = np.copy(surface.image)
+        for i in xrange(height):
+            for j in xrange(width):
+                point = np.array([j, i])
+                if top_edge.is_point_on_right(point) or right_edge.is_point_on_right(point) \
+                    or bottom_edge.is_point_on_left(point) or left_edge.is_point_on_left(point):
+                    clipped_image[i, j] = (0, 0, 0)
+
+        # clipped_image[y1:y2, x1:x2] = surface.image[y1:y2, x1:x2]
 
         return clipped_image
 
@@ -271,7 +284,6 @@ def generate_video(width, height, frames, file_name, path='./app/static/video'):
     writer = cv2.VideoWriter(file_path, fourcc, fps, cap_size, True)
 
     for x in range(len(frames)):
-        print 'Generating frame:', x+1, '/', len(frames)
         writer.write(frames[x])
     writer.release()
     print 'Video generation complete!'

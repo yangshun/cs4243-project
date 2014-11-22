@@ -63,3 +63,32 @@ class Space(object):
     def add_model(self, model):
         assert isinstance(model, Polyhedron)
         self.models.append(model)
+
+
+class Line2D(object):
+    def __init__(self, point1, point2):
+        """
+        Using the line equation a*x + b*y + c = 0 with b >= 0
+        :param point1: starting point
+        :param point2: ending point
+        :return: a Line object
+        """
+        assert len(point1) == 2 and len(point2) == 2
+
+        self.a = point2[1] - point1[1]
+        self.b = point1[0] - point2[0]
+        self.c = point1[1] * point2[0] - point1[0] * point2[1]
+
+        if self.b < 0:
+            self.a = -self.a
+            self.b = -self.b
+            self.c = -self.c
+
+    def is_point_on_left(self, point):
+        return self.a * point[0] + self.b * point[1] + self.c > 0
+
+    def is_point_on_right(self, point):
+        return self.a * point[0] + self.b * point[1] + self.c < 0
+
+    def is_point_on_line(self, point):
+        return self.a * point[0] + self.b * point[1] + self.c == 0
