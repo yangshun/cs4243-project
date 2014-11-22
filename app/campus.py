@@ -9,7 +9,8 @@ from camera import Camera, generate_video
 from surface import Surface, Polyhedron, Space
 
 
-CAMPUS_IMAGE_PATH = STATIC_PATH + '/campus'
+# CAMPUS_IMAGE_PATH = STATIC_PATH + '/campus'
+CAMPUS_IMAGE_PATH = STATIC_PATH + '/test'
 
 
 WIDTH = 741

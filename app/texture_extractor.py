@@ -7,7 +7,7 @@ from app.reconstructor import Reconstructor
 from app.graham_scan import *
 
 
-class TextureExtractor (object):
+class TextureExtractor(object):
     """Texture Extractor is used to extract a quad on an image and fatten it to be a rectangle texture"""
 
     def __init__(self, image, resolution=None, focus=None):
