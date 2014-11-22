@@ -75,7 +75,9 @@ def campus():
     smooth_camera_path, smooth_camera_angles = smoothen_camera(filtered_camera_path, filtered_camera_angles)
     
     frames = []
-    for position, orientation in zip(smooth_camera_path, smooth_camera_angles):
+    num_of_frames = len(smooth_camera_path)
+    for index, (position, orientation) in enumerate(zip(smooth_camera_path, smooth_camera_angles)):
+        print 'Generating frame:', index + 1, '/', num_of_frames
         camera.position = position
         camera.orientation = orientation
         frame = camera.project_space(space)
