@@ -66,10 +66,17 @@ def campus():
     BEZIER_PATH_ORDER = 3
     camera = Camera(DEPTH/2, width=camera_width, height=camera_height)
     camera_path, camera_angles = generate_bezier_path_and_orientations(data['camera_path'], BEZIER_PATH_ORDER)
-    camera_path, camera_angles = smoothen_camera(camera_path, camera_angles)
-        
+    filtered_camera_path, filtered_camera_angles = [], []
+    print camera_angles
+    for i in range(len(camera_path)):
+        if int(camera_angles[i]) != 0:
+            filtered_camera_path.append(camera_path[i])
+            filtered_camera_angles.append(camera_angles[i])
+    
+    smooth_camera_path, smooth_camera_angles = smoothen_camera(filtered_camera_path, filtered_camera_angles)
+    
     frames = []
-    for position, orientation in zip(camera_path, camera_angles):
+    for position, orientation in zip(smooth_camera_path, smooth_camera_angles):
         camera.position = position
         camera.orientation = orientation
         frame = camera.project_space(space)
@@ -81,26 +88,6 @@ def campus():
     return json.dumps({ 'status': 'success', 
                         'video': {'name': file_name, 'width': camera_width, 'height': camera_height, 'src': file_path}
                     })
-
-def generate_camera_orientation(camera_path, look_forward):
-
-    orientations = []
-    if look_forward:
-        for i in range(len(camera_path)):
-            orientations.append(np.array())
-    else:
-        for i in range(1, len(camera_path)):
-            optical_vector = np.array([camera_path[i][0] - camera_path[i-1][0], camera_path[i][1] - camera_path[i-1][1], 0])
-            if np.linalg.norm(optical_vector) > 0:
-                optical_vector_norm = optical_vector / np.linalg.norm(optical_vector)
-            else:
-                optical_vector_norm = optical_vector
-            angle_rad = atan2(optical_vector_norm[1], optical_vector_norm[0])
-            angle_deg = ceil(angle_rad/pi * 180)
-            orientations.append(angle_deg)
-            if i == len(camera_path) - 1:
-                orientations.append(angle_deg)
-    return orientations
 
 NUM_LINE_SEGMENTS = 256
 
@@ -146,6 +133,7 @@ def generate_bezier_path_and_orientations(points_list, order):
             dQty = 3*((1-t)**2)*t*(p1['y']-p0['y']) + 6*(1-t)*t*(p2['y']-p1['y']) + 3*(t**2)*(p3['y']-p2['y'])
             angle_rad = atan2(dQty, dQtx)
             angle_deg = ceil(angle_rad/pi * 180)
+            angle_deg = (angle_deg + 360) % 360
             path_angles.append(angle_deg)
         prev_p2 = p2
     return path_points, path_angles
@@ -155,8 +143,8 @@ def smoothen_camera(camera_path, camera_angles):
     vertical_vector = np.array([0, 0, -1])
     for i in range(1, len(camera_angles)):
         step = 1 if camera_angles[i] > camera_angles[i-1] else -1
-        number_of_interpolations = camera_angles[i-1] - camera_angles[i]
-        for angle_deg in range(int(camera_angles[i-1]), int(camera_angles[i]), step):
+        end_range = (int(camera_angles[i]) + 1) if (int(camera_angles[i-1]) - int(camera_angles[i]) == 0) else int(camera_angles[i])
+        for angle_deg in range(int(camera_angles[i-1]), end_range, step):
             optical_vector = np.array([cos(float(angle_deg)/180 * pi), sin(float(angle_deg)/180 * pi), 0])
             horizontal_vector = np.cross(vertical_vector, optical_vector)
             final_camera_angles.append(np.array([horizontal_vector, vertical_vector, optical_vector]))
