@@ -103,9 +103,9 @@ def generate_bezier_path_and_orientations(points_list, order):
     for i in range(num_bezier_sets):
         p0 = points_list[i * order]
         if i != 0:
+            # Modify the second point to make it C1 continuous
             diff_x = p0['x'] - prev_p2['x']
             diff_y = p0['y'] - prev_p2['y']
-            diff_z = p0['z'] - prev_p2['z']
             p1 = {}
             p1['x'] = p0['x'] + diff_x
             p1['y'] = p0['y'] + diff_y
@@ -129,8 +129,8 @@ def generate_bezier_path_and_orientations(points_list, order):
 
         for j in range(NUM_LINE_SEGMENTS):
             t = float(j) / NUM_LINE_SEGMENTS
-            dQtx = 3*((1-t)**2)*t*(p1['x']-p0['x']) + 6*(1-t)*t*(p2['x']-p1['x']) + 3*(t**2)*(p3['x']-p2['x'])
-            dQty = 3*((1-t)**2)*t*(p1['y']-p0['y']) + 6*(1-t)*t*(p2['y']-p1['y']) + 3*(t**2)*(p3['y']-p2['y'])
+            dQtx = 3*((1-t)**2)*(p1['x']-p0['x']) + 6*(1-t)*t*(p2['x']-p1['x']) + 3*(t**2)*(p3['x']-p2['x'])
+            dQty = 3*((1-t)**2)*(p1['y']-p0['y']) + 6*(1-t)*t*(p2['y']-p1['y']) + 3*(t**2)*(p3['y']-p2['y'])
             angle_rad = atan2(dQty, dQtx)
             angle_deg = ceil(angle_rad/pi * 180)
             angle_deg = (angle_deg + 360) % 360
