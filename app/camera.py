@@ -85,7 +85,10 @@ class Camera(object):
         if x1 == x2 or y1 == y2:
             return None
 
-        return surface.image[y1:y2, x1:x2]
+        clipped_image = np.zeros_like(surface.image)
+        clipped_image[y1:y2, x1:x2] = surface.image[y1:y2, x1:x2]
+
+        return clipped_image
 
     def _find_cut_region(self, left_dist, right_dist, length):
         """
