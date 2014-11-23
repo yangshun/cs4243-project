@@ -33,8 +33,8 @@ def campus():
     topleft = (inner_rect_data['x'], inner_rect_data['y'])
     bottomright = (inner_rect_data['x'] + inner_rect_data['width'], inner_rect_data['y'] + inner_rect_data['height'])
     inner_box = (topleft, bottomright)
-    vanishing_point = (684, 846)
-    image_name = 'project.jpg'
+    vanishing_point = (data['vanishingPoint']['x'], data['vanishingPoint']['y'])
+    image_name = data['image']
 
     surfaces = cut_image(image_name, space_dimension, inner_box, vanishing_point)
     space.add_model(Polyhedron(surfaces))

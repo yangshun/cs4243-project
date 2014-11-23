@@ -29,7 +29,7 @@ def cut_image(image_name, space_dimension, inner_box, vanishing_point):
 
         # Extract textures to files
         texture = extractor.extractTexture(corners)
-        cv2.imwrite(SLICED_IMAGE_PATH + '/' + texture_name + ".png", texture)
+        cv2.imwrite(SLICED_IMAGE_PATH + '/' + image_name + '_' + texture_name + ".png", texture)
 
         # Retrieve 3D corners
         corners3d = all_surfaces_3d_corner[texture_name]
