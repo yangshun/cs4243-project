@@ -1,4 +1,4 @@
-from flask import render_template, request
+from flask import request
 import json
 from app import *
 import cv2
@@ -140,26 +140,3 @@ def smoothen_camera(camera_path, camera_angles):
             final_path_points.append(camera_path[i])
     return final_path_points, final_camera_angles
 
-#################
-# OLD CODE!!!!
-#################
-num_of_points = 50
-
-
-def old_generate_path():
-    points = []
-    for i in range(1, num_of_points + 1):
-        # points.append((0.0, -DEPTH, HEIGHT/2.0))
-        points.append((-250 + i*10, -1500 + i*20, 30))
-    return np.array(points)
-
-
-def old_generate_camera_orientation():
-    orientations = []
-    for i in range(90 - num_of_points/2, 90 + num_of_points/2):
-    # for i in range(0, 180, 180 // num_of_points):
-        angle = i / 180.0 * pi
-        # angle = pi / 2 + 0.001
-        # print "in degree ", i, "in radian ", angle
-        orientations.append(np.array([[sin(angle), -cos(angle), 0], [0, 0, -1], [cos(angle), sin(angle), 0]]))
-    return orientations
