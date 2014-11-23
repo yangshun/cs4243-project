@@ -103,4 +103,4 @@ class Line2D(object):
         if self.a == 0:
             return 0.0
 
-        return 1.9 * (-self.c - self.b * y) / self.a
+        return 1.0 * (-self.c - self.b * y) / self.a
