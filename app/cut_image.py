@@ -4,7 +4,7 @@ import cv2
 import numpy as np
 from reconstructor import Reconstructor
 from texture_extractor import TextureExtractor
-from surface import Line2D
+from surface import Surface, Line2D
 
 
 IMAGE_PATH = STATIC_PATH + '/test'
@@ -47,7 +47,20 @@ IMAGE_PATH = STATIC_PATH + '/test'
 # ]
 
 
-@app.route('/cut_image')
+WIDTH = 741
+HEIGHT = 304
+DEPTH = 2095
+
+CORNERS_3D = {
+    'center': np.array([(-WIDTH/2.0, 0, HEIGHT), (WIDTH/2.0, 0, HEIGHT), (WIDTH/2.0, 0, 0), (-WIDTH/2.0, 0, 0)]),
+    'right': np.array([(WIDTH/2.0, 0, HEIGHT), (WIDTH/2.0, -DEPTH, HEIGHT), (WIDTH/2.0, -DEPTH, 0), (WIDTH/2.0, 0, 0)]),
+    'left': np.array([(-WIDTH/2.0, -DEPTH, HEIGHT), (-WIDTH/2.0, 0, HEIGHT), (-WIDTH/2.0, 0, 0), (-WIDTH/2.0, -DEPTH, 0)]),
+    'top': np.array([(-WIDTH/2.0, -DEPTH, HEIGHT), (WIDTH/2.0, -DEPTH, HEIGHT), (WIDTH/2.0, 0, HEIGHT), (-WIDTH/2.0, 0, HEIGHT)]),
+    'bottom': np.array([(-WIDTH/2.0, 0, 0), (WIDTH/2.0, 0, 0), (WIDTH/2.0, -DEPTH, 0), (-WIDTH/2.0, -DEPTH, 0)]),
+}
+
+
+# @app.route('/cut_image')
 def cut_image():
 
     image = cv2.imread(STATIC_PATH + '/img/project.jpg', cv2.CV_LOAD_IMAGE_COLOR)
@@ -65,17 +78,32 @@ def cut_image():
 
     data = generate_corners_data(width, height, depth, inner_top_left, inner_bottom_right, vanishing_point)
 
+    surfaces = []
     for texture_name, corners, depths in data:
 
         # Extract textures to files
         texture = extractor.extractTexture(corners)
         cv2.imwrite(IMAGE_PATH + '/' + texture_name + ".png", texture)
 
+        # Calculate 3D corners
+        print texture_name
+        corners3d = []
         for i in range(len(corners)):
             position3D = reconstructor.calculate3DCoordinate(corners[i], depths[i])
+
             print position3D
 
-    return render_template('campus.html', image_name="campus")
+        corners3d = CORNERS_3D[texture_name]
+
+        # Calculate 2D corners. Just the 4 corners of the image rectangle
+        texture_height, texture_width, _ = texture.shape
+        corners2d = np.float32([(0, 0), (texture_width, 0), (texture_width, texture_height), (0, texture_height)])
+
+        surface = Surface(texture, corners3d, corners2d)
+        surfaces.append(surface)
+
+    # return render_template('campus.html', image_name="campus")
+    return surfaces
 
 
 # This method assumes that when extrapolating the inner box, the line cuts the 2 side edges of the image
