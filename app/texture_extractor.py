@@ -40,7 +40,7 @@ class TextureExtractor(object):
         assert (len(corners) == 4)
 
         # Sort corners to the clock wise order, starting with top-left
-        # corners = self.__sortCorners (corners)
+        corners = self.__sortCorners (corners)
 
         # Reconstruct the 3D position of the corners to calculate the optimal width and height
         cornerPositions = [(0, 0, 0)] * 4
