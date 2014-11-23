@@ -52,7 +52,7 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
-# Video
+# Generated Assets
 *.mp4
 *.mov
-
+app/static/img/sliced/
