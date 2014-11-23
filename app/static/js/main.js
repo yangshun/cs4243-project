@@ -19,11 +19,21 @@ var POINT_LABEL_FONT_WEIGHT = 'bold';
 var CAMERA_DEFAULT_HEIGHT = 40;
 
 angular.module('CameraApp', []).config(function ($interpolateProvider) {
-    $interpolateProvider.startSymbol('[[').endSymbol(']]');
+  $interpolateProvider.startSymbol('[[').endSymbol(']]');
 });
 
 function CameraController ($scope, $http) {
-
+  var images = {
+    cmu: {
+      image: 'cmu.jpg',
+      plan: 'cmu-plan.jpg'
+    },
+    stanford: {
+      image: 'stanford.jpg',
+      plan: 'stanford-plan.jpg'
+    }
+  }
+  $scope.selectedImage = images.cmu;
   // Plan view slicing
   planViewCanvas = new fabric.Canvas('map-container', {
     width: CANVAS_WIDTH,
@@ -158,11 +168,16 @@ function CameraController ($scope, $http) {
       file_name: new Date().getTime(),
       world: $scope.world,
       planeRect: {
-        x: parseInt($scope.planeTopLeft.x * 1/scale),
-        y: parseInt($scope.planeTopLeft.y * 1/scale),
-        width: parseInt(($scope.planeBottomRight.x - $scope.planeTopLeft.x) * 1/scale),
-        height: parseInt(($scope.planeBottomRight.y - $scope.planeTopLeft.y) * 1/scale)
-      }
+        x: parseInt($scope.planeTopLeft.x/scale),
+        y: parseInt($scope.planeTopLeft.y/scale),
+        width: parseInt(($scope.planeBottomRight.x - $scope.planeTopLeft.x)/scale),
+        height: parseInt(($scope.planeBottomRight.y - $scope.planeTopLeft.y)/scale)
+      },
+      vanishingPoint: {
+        x: parseInt($scope.vanishingPoint.left/scale),
+        y: parseInt($scope.vanishingPoint.top/scale),
+      },
+      image: $scope.selectedImage.image
     }).success(function (res, status, headers, config) {
       if (res.status === 'success') {
         $scope.renderingVideo = false;
@@ -189,7 +204,7 @@ function CameraController ($scope, $http) {
 
   $scope.toggleBoundaryRectEditing = toggleBoundaryRectEditing;
 
-  fabric.Image.fromURL('/static/img/aerial-view.jpg', function (img) {
+  fabric.Image.fromURL('/static/img/' + $scope.selectedImage.plan, function (img) {
     img.set('selectable', false);
     planViewCanvas.add(img);
     planViewCanvas.add(boundaryRect);
@@ -212,11 +227,11 @@ function CameraController ($scope, $http) {
 
   var img = new Image();
   var scale;
-  img.src = '/static/img/cmu-ece.jpg';
+  img.src = '/static/img/' + $scope.selectedImage.image;
   img.onload = function () {
     var imgWidth = this.width;
     var imgHeight = this.height;
-    fabric.Image.fromURL('/static/img/cmu-ece.jpg', function (img) {
+    fabric.Image.fromURL('/static/img/' + $scope.selectedImage.image, function (img) {
       img.set('selectable', false);
       img.set('width', CANVAS_WIDTH);
       scale = CANVAS_WIDTH/imgWidth;
