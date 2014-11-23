@@ -1,4 +1,3 @@
-from flask import render_template
 from app import *
 import cv2
 import numpy as np
@@ -7,44 +6,9 @@ from texture_extractor import TextureExtractor
 from surface import Surface, Line2D
 
 
-IMAGE_PATH = STATIC_PATH + '/test'
+IMAGE_PATH = STATIC_PATH + '/img'
+SLICED_IMAGE_PATH = IMAGE_PATH + '/sliced'
 
-
-# data = [
-#     (
-#         "FrontGate",
-#         [ (700, 750), (830, 750), (830, 870), (700, 870)],
-#         [ 140, 140, 140, 140 ]
-#     ),
-#     (
-#         "FrontCooridor-Right",
-#         [ (830, 790), (970, 780), (970, 875), (830, 870)],
-#         [ 140, 140, 140, 140 ]
-#     ),
-#     (
-#         "FarRightBuilding-FrontFace",
-#         [ (1170, 700), (1235, 680), (1240, 885), (1170, 875)],
-#         [ 90, 80, 80, 90 ]
-#     ),
-#     (
-#         "RightTree-Tall",
-#         [ (1390, 450), (1480, 800), (1400, 900), (1300, 800)],
-#         [ 84, 83, 82, 83 ]
-#     )
-# ]
-
-# data = [
-#     (
-#         "center",
-#         [(590, 510), (1130, 510), (1130, 875), (590, 875)],
-#         [140, 140, 140, 140]
-#     ),
-#     (
-#         "right",
-#         [(1130, 510), (1632, 370), (1632, 920), (1130, 875)],
-#         [140, 0, 0, 140]
-#     ),
-# ]
 
 
 WIDTH = 741
@@ -60,30 +24,28 @@ CORNERS_3D = {
 }
 
 
-# @app.route('/cut_image')
-def cut_image():
+def cut_image(image_name, camera_info, space_dimension, inner_box, vanishing_point):
 
-    image = cv2.imread(STATIC_PATH + '/img/project.jpg', cv2.CV_LOAD_IMAGE_COLOR)
+    original_image = cv2.imread(IMAGE_PATH + '/' + image_name, cv2.CV_LOAD_IMAGE_COLOR)
 
-    extractor = TextureExtractor(image)
+    extractor = TextureExtractor(original_image)
 
     # Create a reconstructor to convert 3D coordinate of 2D points
-    reconstructor = Reconstructor(image.shape, 28370, 0.041)
+    reconstructor = Reconstructor(original_image.shape, camera_info['resolution'], camera_info['focal_length'])
 
-    inner_top_left = (390, 579)
-    inner_bottom_right = (1130, 882)
-    vanishing_point = (684, 846)
-    height, width, _ = image.shape
-    depth = 140
+    inner_top_left, inner_bottom_right = inner_box
+    image_height, image_width, _ = original_image.shape
+    space_width, space_height, space_depth = space_dimension
 
-    data = generate_corners_data(width, height, depth, inner_top_left, inner_bottom_right, vanishing_point)
+    data = generate_corners_data(image_width, image_height, space_depth, inner_top_left, inner_bottom_right,
+                                 vanishing_point)
 
     surfaces = []
     for texture_name, corners, depths in data:
 
         # Extract textures to files
         texture = extractor.extractTexture(corners)
-        cv2.imwrite(IMAGE_PATH + '/' + texture_name + ".png", texture)
+        cv2.imwrite(SLICED_IMAGE_PATH + '/' + texture_name + ".png", texture)
 
         # Calculate 3D corners
         print texture_name
@@ -102,7 +64,6 @@ def cut_image():
         surface = Surface(texture, corners3d, corners2d)
         surfaces.append(surface)
 
-    # return render_template('campus.html', image_name="campus")
     return surfaces
 
 
