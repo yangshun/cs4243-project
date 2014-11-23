@@ -156,7 +156,7 @@ function CameraController ($scope, $http) {
     $http.post('/generate_video', {
       camera_path: cameraPathPoints,
       file_name: new Date().getTime(),
-      world: world,
+      world: $scope.world,
       planeRect: {
         x: parseInt($scope.planeTopLeft.x * 1/scale),
         y: parseInt($scope.planeTopLeft.y * 1/scale),

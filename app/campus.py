@@ -60,8 +60,16 @@ def campus():
         'resolution': 28370  # resolution of the image, pixels/meter
     }
 
-    space_dimension = (52, 21, 140)  # width, height and depth
-    inner_box = ((390, 579), (1130, 882))  # top_left and bottom_right corners in (x, y) form
+    # space_dimension = (52, 21, 140)  # width, height and depth
+    # inner_box = ((390, 579), (1130, 882))  # top_left and bottom_right corners in (x, y) form
+    # vanishing_point = (684, 846)
+
+    world_dimension_data = data['world']
+    space_dimension = (world_dimension_data['width'], world_dimension_data['height'], world_dimension_data['depth'])
+    inner_rect_data = data['planeRect']
+    topleft = (inner_rect_data['x'], inner_rect_data['y'])
+    bottomright = (inner_rect_data['x'] + inner_rect_data['width'], inner_rect_data['y'] + inner_rect_data['height'])
+    inner_box = (topleft, bottomright)
     vanishing_point = (684, 846)
 
     surfaces = cut_image('project.jpg', camera_info, space_dimension, inner_box, vanishing_point)
