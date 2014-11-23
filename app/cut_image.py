@@ -91,7 +91,6 @@ def generate_corners_data(width, height, depth, inner_top_left, inner_bottom_rig
 
     return [center, right, left, top, bottom]
 
-
 def generate_corners_3dcoordinates(space_dimension):
     width, height, depth = space_dimension
     return {
