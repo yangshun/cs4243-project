@@ -33,7 +33,12 @@ function CameraController ($scope, $http) {
       plan: 'stanford-plan.jpg'
     }
   }
-  $scope.selectedImage = images[window.location.hash.substring(1)];
+  var type = window.location.hash.substring(1);
+  if (!type) {
+    type = 'cmu';
+  }
+  $scope.selectedImage = images[type];
+  
   // Plan view slicing
   planViewCanvas = new fabric.Canvas('map-container', {
     width: CANVAS_WIDTH,
@@ -52,6 +57,9 @@ function CameraController ($scope, $http) {
 
   function getBoundaryRectProps () {
     return {
+      scale: 1,
+      scaleX: 1,
+      scaleY: 1,
       width: $scope.bottomRight.x - $scope.topLeft.x, 
       height: $scope.bottomRight.y - $scope.topLeft.y,
       left: $scope.topLeft.x, 
@@ -287,6 +295,9 @@ function CameraController ($scope, $http) {
 
   function getPlaneBoundaryRectProps () {
     return {
+      scale: 1,
+      scaleX: 1,
+      scaleY: 1,
       width: $scope.planeBottomRight.x - $scope.planeTopLeft.x, 
       height: $scope.planeBottomRight.y - $scope.planeTopLeft.y,
       left: $scope.planeTopLeft.x,
