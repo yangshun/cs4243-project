@@ -7,9 +7,11 @@ from math import *
 
 from camera import Camera, generate_video
 from surface import Surface, Polyhedron, Space
+from cut_image import *
 
 
-CAMPUS_IMAGE_PATH = STATIC_PATH + '/campus'
+SLICED_IMAGE_PATH = STATIC_PATH + '/img/sliced'
+# CAMPUS_IMAGE_PATH = STATIC_PATH + '/test'
 
 WIDTH = 741
 HEIGHT = 304
@@ -53,12 +55,17 @@ def campus():
 
     space = Space()
 
-    image_names = ['center', 'right', 'left', 'top', 'bottom']
+    camera_info = {
+        'focal_length': 0.041,  # meters
+        'resolution': 28370  # resolution of the image, pixels/meter
+    }
 
-    for image_name in image_names:
-        image = cv2.imread(CAMPUS_IMAGE_PATH + '/' + image_name + '.png', cv2.CV_LOAD_IMAGE_COLOR)
-        surface = Surface(image, CORNERS_3D[image_name], CORNERS_2D[image_name])
-        space.add_model(Polyhedron([surface]))
+    space_dimension = (52, 21, 140)  # width, height and depth
+    inner_box = ((390, 579), (1130, 882))  # top_left and bottom_right corners in (x, y) form
+    vanishing_point = (684, 846)
+
+    surfaces = cut_image('project.jpg', camera_info, space_dimension, inner_box, vanishing_point)
+    space.add_model(Polyhedron(surfaces))
 
     camera_width = 970
     camera_height = 400

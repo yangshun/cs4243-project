@@ -2,7 +2,7 @@ import math
 import numpy as np
 
 
-class Reconstructor (object):
+class Reconstructor(object):
     """
     Reconstructor is used to derive the 3D position of every pixel
     in an arbitrary image, providing the depth of that pixel.
@@ -26,8 +26,8 @@ class Reconstructor (object):
         the estimated depth of the pixel.
         @param:
             pixel: a tuple (x,y) denoting the pixel on the image. Note that
-        (0,0) is the top left corner of the image. x is row number and y is
-        column number.
+        (0,0) is the top left corner of the image. x is column number and y is
+        row number.
             depth: the z value of the pixel. z = focus is the virtual plane
         of the camera. z = 0 is the plane containing the camera.
         @return:

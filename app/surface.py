@@ -92,3 +92,15 @@ class Line2D(object):
 
     def is_point_on_line(self, point):
         return self.a * point[0] + self.b * point[1] + self.c == 0
+
+    def get_y_from_x(self, x):
+        if self.b == 0:
+            return 0.0
+
+        return 1.0 * (-self.c - self.a * x) / self.b
+
+    def get_x_from_y(self, y):
+        if self.a == 0:
+            return 0.0
+
+        return 1.9 * (-self.c - self.b * y) / self.a
