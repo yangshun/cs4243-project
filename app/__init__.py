@@ -7,6 +7,6 @@ app = Flask(__name__)
 STATIC_PATH = './app/static'
 
 import cube
-import campus
+import process
 import controllers
 import cut_image

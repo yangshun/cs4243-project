@@ -12,7 +12,7 @@ from cut_image import *
 SLICED_IMAGE_PATH = STATIC_PATH + '/img/sliced'
 
 @app.route('/generate_video', methods=['POST'])
-def campus():
+def process():
     data = json.loads(request.data)
     space = Space()
     world_dimension_data = data['world']

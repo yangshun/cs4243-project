@@ -44,9 +44,9 @@ def cut_image(image_name, space_dimension, inner_box, vanishing_point):
     return surfaces
 
 
-# This method assumes that when extrapolating the inner box, the line cuts the 2 side edges of the image
-# not the top and the bottom boundaries.
 def generate_corners_data(width, height, depth, inner_top_left, inner_bottom_right, vanishing_point):
+    # This method assumes that when extrapolating the inner box, 
+    # the line cuts the 2 side edges of the image not the top and the bottom boundaries.
     inner_top_right = (inner_bottom_right[0], inner_top_left[1])
     inner_bottom_left = (inner_top_left[0], inner_bottom_right[1])
 
@@ -60,31 +60,31 @@ def generate_corners_data(width, height, depth, inner_top_left, inner_bottom_rig
     outer_bottom_left = (0, min(bottom_left_line.get_y_from_x(0), height))
 
     center = (
-        "center",
+        'center',
         [inner_top_left, inner_top_right, inner_bottom_right, inner_bottom_left],
         [depth, depth, depth, depth]
     )
 
     right = (
-        "right",
+        'right',
         [inner_top_right, outer_top_right, outer_bottom_right, inner_bottom_right],
         [depth, 0, 0, depth]
     )
 
     left = (
-        "left",
+        'left',
         [outer_top_left, inner_top_left, inner_bottom_left, outer_bottom_left],
         [0, depth, depth, 0]
     )
 
     top = (
-        "top",
+        'top',
         [outer_top_left, outer_top_right, inner_top_right, inner_top_left],
         [0, 0, depth, depth]
     )
 
     bottom = (
-        "bottom",
+        'bottom',
         [inner_bottom_left, inner_bottom_right, outer_bottom_right, outer_bottom_left],
         [depth, depth, 0, 0]
     )
