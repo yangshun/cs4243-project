@@ -9,24 +9,12 @@ from camera import Camera, generate_video
 from surface import Surface, Polyhedron, Space
 from cut_image import *
 
-
 SLICED_IMAGE_PATH = STATIC_PATH + '/img/sliced'
-
-WIDTH = 741
-HEIGHT = 304
-DEPTH = 2095
-
 
 @app.route('/generate_video', methods=['POST'])
 def campus():
     data = json.loads(request.data)
-
     space = Space()
-
-    # space_dimension = (52, 21, 140)  # width, height and depth
-    # inner_box = ((390, 579), (1130, 882))  # top_left and bottom_right corners in (x, y) form
-    # vanishing_point = (684, 846)
-
     world_dimension_data = data['world']
     space_dimension = (world_dimension_data['width'], world_dimension_data['height'], world_dimension_data['depth'])
     inner_rect_data = data['planeRect']
@@ -95,6 +83,7 @@ def generate_bezier_path_and_orientations(points_list, order):
         p3 = points_list[i * order + 3]
         segment_chunk_length = NUM_LINE_SEGMENTS / 3
         for j in range(NUM_LINE_SEGMENTS):
+            # Generate path points between control points
             t = float(j) / NUM_LINE_SEGMENTS
             x = ((1-t)**3)*p0['x'] + 3*((1-t)**2)*t*p1['x'] + 3*(1-t)*(t**2)*p2['x'] + (t**3)*p3['x']
             y = ((1-t)**3)*p0['y'] + 3*((1-t)**2)*t*p1['y'] + 3*(1-t)*(t**2)*p2['y'] + (t**3)*p3['y']
@@ -107,6 +96,7 @@ def generate_bezier_path_and_orientations(points_list, order):
             path_points.append((x, y, z))
 
         for j in range(NUM_LINE_SEGMENTS):
+            # Calculate the orientation for each path point
             t = float(j) / NUM_LINE_SEGMENTS
             dQtx = 3*((1-t)**2)*(p1['x']-p0['x']) + 6*(1-t)*t*(p2['x']-p1['x']) + 3*(t**2)*(p3['x']-p2['x'])
             dQty = 3*((1-t)**2)*(p1['y']-p0['y']) + 6*(1-t)*t*(p2['y']-p1['y']) + 3*(t**2)*(p3['y']-p2['y'])
@@ -118,6 +108,9 @@ def generate_bezier_path_and_orientations(points_list, order):
     return path_points, path_angles
 
 def smoothen_camera(camera_path, camera_angles):
+    # The change in camera orientation between two immediate path points can be large
+    # if the turning angle is big. Hence we interpolate the orientations between
+    # two immediate path points to make the change in oriengation gradual
     final_path_points, final_camera_angles = [], []
     vertical_vector = np.array([0, 0, -1])
     for i in range(1, len(camera_angles)):
@@ -134,9 +127,9 @@ def smoothen_camera(camera_path, camera_angles):
                 end_range = int(camera_angles[i-1])
                 step = 1
         for angle_deg in range(start_range, end_range, step):
+            # Interpolate between two orientations to make the camera turning smooth
             optical_vector = np.array([cos(float(angle_deg)/180 * pi), sin(float(angle_deg)/180 * pi), 0])
             horizontal_vector = np.cross(vertical_vector, optical_vector)
             final_camera_angles.append(np.array([horizontal_vector, vertical_vector, optical_vector]))
             final_path_points.append(camera_path[i])
     return final_path_points, final_camera_angles
-

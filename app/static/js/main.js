@@ -33,7 +33,7 @@ function CameraController ($scope, $http) {
       plan: 'stanford-plan.jpg'
     }
   }
-  $scope.selectedImage = images.cmu;
+  $scope.selectedImage = images[window.location.hash.substring(1)];
   // Plan view slicing
   planViewCanvas = new fabric.Canvas('map-container', {
     width: CANVAS_WIDTH,
