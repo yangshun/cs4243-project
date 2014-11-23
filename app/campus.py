@@ -29,8 +29,9 @@ def campus():
 
     camera_width = 970
     camera_height = 400
+    camera_depth = world_dimension_data['depth']
     BEZIER_PATH_ORDER = 3
-    camera = Camera(DEPTH/2, width=camera_width, height=camera_height)
+    camera = Camera(camera_depth/2, width=camera_width, height=camera_height)
     camera_path, camera_angles = generate_bezier_path_and_orientations(data['camera_path'], BEZIER_PATH_ORDER)
     filtered_camera_path, filtered_camera_angles = [], []
     for i in range(len(camera_path)):
