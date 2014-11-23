@@ -1,7 +1,6 @@
 from app import *
 import cv2
 import numpy as np
-from reconstructor import Reconstructor
 from texture_extractor import TextureExtractor
 from surface import Surface, Line2D
 
@@ -10,28 +9,11 @@ IMAGE_PATH = STATIC_PATH + '/img'
 SLICED_IMAGE_PATH = IMAGE_PATH + '/sliced'
 
 
-
-WIDTH = 741
-HEIGHT = 304
-DEPTH = 2095
-
-CORNERS_3D = {
-    'center': np.array([(-WIDTH/2.0, 0, HEIGHT), (WIDTH/2.0, 0, HEIGHT), (WIDTH/2.0, 0, 0), (-WIDTH/2.0, 0, 0)]),
-    'right': np.array([(WIDTH/2.0, 0, HEIGHT), (WIDTH/2.0, -DEPTH, HEIGHT), (WIDTH/2.0, -DEPTH, 0), (WIDTH/2.0, 0, 0)]),
-    'left': np.array([(-WIDTH/2.0, -DEPTH, HEIGHT), (-WIDTH/2.0, 0, HEIGHT), (-WIDTH/2.0, 0, 0), (-WIDTH/2.0, -DEPTH, 0)]),
-    'top': np.array([(-WIDTH/2.0, -DEPTH, HEIGHT), (WIDTH/2.0, -DEPTH, HEIGHT), (WIDTH/2.0, 0, HEIGHT), (-WIDTH/2.0, 0, HEIGHT)]),
-    'bottom': np.array([(-WIDTH/2.0, 0, 0), (WIDTH/2.0, 0, 0), (WIDTH/2.0, -DEPTH, 0), (-WIDTH/2.0, -DEPTH, 0)]),
-}
-
-
-def cut_image(image_name, camera_info, space_dimension, inner_box, vanishing_point):
+def cut_image(image_name, space_dimension, inner_box, vanishing_point):
 
     original_image = cv2.imread(IMAGE_PATH + '/' + image_name, cv2.CV_LOAD_IMAGE_COLOR)
 
     extractor = TextureExtractor(original_image)
-
-    # Create a reconstructor to convert 3D coordinate of 2D points
-    reconstructor = Reconstructor(original_image.shape, camera_info['resolution'], camera_info['focal_length'])
 
     inner_top_left, inner_bottom_right = inner_box
     image_height, image_width, _ = original_image.shape
@@ -39,23 +21,18 @@ def cut_image(image_name, camera_info, space_dimension, inner_box, vanishing_poi
 
     data = generate_corners_data(image_width, image_height, space_depth, inner_top_left, inner_bottom_right,
                                  vanishing_point)
+    
+    all_surfaces_3d_corner = generate_corners_3dcoordinates(space_dimension)
 
     surfaces = []
     for texture_name, corners, depths in data:
 
         # Extract textures to files
         texture = extractor.extractTexture(corners)
-        cv2.imwrite(SLICED_IMAGE_PATH + '/' + texture_name + ".png", texture)
+        cv2.imwrite(SLICED_IMAGE_PATH + '/' + image_name + '_' + texture_name + ".png", texture)
 
-        # Calculate 3D corners
-        print texture_name
-        corners3d = []
-        for i in range(len(corners)):
-            position3D = reconstructor.calculate3DCoordinate(corners[i], depths[i])
-
-            print position3D
-
-        corners3d = CORNERS_3D[texture_name]
+        # Retrieve 3D corners
+        corners3d = all_surfaces_3d_corner[texture_name]
 
         # Calculate 2D corners. Just the 4 corners of the image rectangle
         texture_height, texture_width, _ = texture.shape
@@ -114,3 +91,13 @@ def generate_corners_data(width, height, depth, inner_top_left, inner_bottom_rig
 
     return [center, right, left, top, bottom]
 
+
+def generate_corners_3dcoordinates(space_dimension):
+    width, height, depth = space_dimension
+    return {
+        'center': np.array([(-width/2.0, 0, height), (width/2.0, 0, height), (width/2.0, 0, 0), (-width/2.0, 0, 0)]),
+        'right': np.array([(width/2.0, 0, height), (width/2.0, -depth, height), (width/2.0, -depth, 0), (width/2.0, 0, 0)]),
+        'left': np.array([(-width/2.0, -depth, height), (-width/2.0, 0, height), (-width/2.0, 0, 0), (-width/2.0, -depth, 0)]),
+        'top': np.array([(-width/2.0, -depth, height), (width/2.0, -depth, height), (width/2.0, 0, height), (-width/2.0, 0, height)]),
+        'bottom': np.array([(-width/2.0, 0, 0), (width/2.0, 0, 0), (width/2.0, -depth, 0), (-width/2.0, -depth, 0)]),
+    }

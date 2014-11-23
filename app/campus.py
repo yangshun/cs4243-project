@@ -11,54 +11,17 @@ from cut_image import *
 
 
 SLICED_IMAGE_PATH = STATIC_PATH + '/img/sliced'
-# CAMPUS_IMAGE_PATH = STATIC_PATH + '/test'
 
 WIDTH = 741
 HEIGHT = 304
 DEPTH = 2095
 
-IMAGE_CORNERS = {
-    'center': np.float32([(0, 0), (741, 0), (741, 304), (0, 304)]),
-    'right': np.float32([(0, 300), (503, 0), (503, 646), (0, 605)]),
-    'left': np.float32([(0, 0), (391, 361), (391, 659), (0, 689)]),
-    'top': np.float32([(0, 0), (1566, 0), (1062, 301), (326, 301)]),
-    'bottom': np.float32([(380, 0), (1132, 6), (1629, 50), (0, 32)])
-}
-
-CORNERS_2D = {
-    'center': np.float32([(0, 0), (WIDTH, 0), (WIDTH, HEIGHT), (0, HEIGHT)]),
-    'right': np.float32([(0, 0), (DEPTH, 0), (DEPTH, HEIGHT), (0, HEIGHT)]),
-    'left': np.float32([(0, 0), (DEPTH, 0), (DEPTH, HEIGHT), (0, HEIGHT)]),
-    'top': np.float32([(0, 0), (WIDTH, 0), (WIDTH, DEPTH), (0, DEPTH)]),
-    'bottom': np.float32([(0, 0), (WIDTH, 0), (WIDTH, DEPTH), (0, DEPTH)])
-}
-
-DIMENSIONS = {
-    'center': (WIDTH, HEIGHT),
-    'right': (DEPTH, HEIGHT),
-    'left': (DEPTH, HEIGHT),
-    'top': (WIDTH, DEPTH),
-    'bottom': (WIDTH, DEPTH)
-}
-
-CORNERS_3D = {
-    'center': np.array([(-WIDTH/2.0, 0, HEIGHT), (WIDTH/2.0, 0, HEIGHT), (WIDTH/2.0, 0, 0), (-WIDTH/2.0, 0, 0)]),
-    'right': np.array([(WIDTH/2.0, 0, HEIGHT), (WIDTH/2.0, -DEPTH, HEIGHT), (WIDTH/2.0, -DEPTH, 0), (WIDTH/2.0, 0, 0)]),
-    'left': np.array([(-WIDTH/2.0, -DEPTH, HEIGHT), (-WIDTH/2.0, 0, HEIGHT), (-WIDTH/2.0, 0, 0), (-WIDTH/2.0, -DEPTH, 0)]),
-    'top': np.array([(-WIDTH/2.0, -DEPTH, HEIGHT), (WIDTH/2.0, -DEPTH, HEIGHT), (WIDTH/2.0, 0, HEIGHT), (-WIDTH/2.0, 0, HEIGHT)]),
-    'bottom': np.array([(-WIDTH/2.0, 0, 0), (WIDTH/2.0, 0, 0), (WIDTH/2.0, -DEPTH, 0), (-WIDTH/2.0, -DEPTH, 0)]),
-}
 
 @app.route('/generate_video', methods=['POST'])
 def campus():
     data = json.loads(request.data)
 
     space = Space()
-
-    camera_info = {
-        'focal_length': 0.041,  # meters
-        'resolution': 28370  # resolution of the image, pixels/meter
-    }
 
     # space_dimension = (52, 21, 140)  # width, height and depth
     # inner_box = ((390, 579), (1130, 882))  # top_left and bottom_right corners in (x, y) form
@@ -70,9 +33,10 @@ def campus():
     topleft = (inner_rect_data['x'], inner_rect_data['y'])
     bottomright = (inner_rect_data['x'] + inner_rect_data['width'], inner_rect_data['y'] + inner_rect_data['height'])
     inner_box = (topleft, bottomright)
-    vanishing_point = (684, 846)
+    vanishing_point = (data['vanishingPoint']['x'], data['vanishingPoint']['y'])
+    image_name = data['image']
 
-    surfaces = cut_image('project.jpg', camera_info, space_dimension, inner_box, vanishing_point)
+    surfaces = cut_image(image_name, space_dimension, inner_box, vanishing_point)
     space.add_model(Polyhedron(surfaces))
 
     camera_width = 970
@@ -199,15 +163,3 @@ def old_generate_camera_orientation():
         # print "in degree ", i, "in radian ", angle
         orientations.append(np.array([[sin(angle), -cos(angle), 0], [0, 0, -1], [cos(angle), sin(angle), 0]]))
     return orientations
-
-
-@app.route('/fix_campus/<image_name>')
-def fix_image(image_name):
-    image = cv2.imread(CAMPUS_IMAGE_PATH + '/' + image_name + '_origin.png')
-    transform_matrix = cv2.getPerspectiveTransform(IMAGE_CORNERS[image_name], CORNERS_2D[image_name])
-    projected_image = cv2.warpPerspective(image, transform_matrix, DIMENSIONS[image_name])
-
-    cv2.imwrite(CAMPUS_IMAGE_PATH + '/' + image_name + '.png', projected_image)
-
-    return render_template('campus.html', image_name=image_name)
-
