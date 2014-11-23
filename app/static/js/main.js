@@ -33,7 +33,7 @@ function CameraController ($scope, $http) {
       plan: 'stanford-plan.jpg'
     }
   }
-  $scope.selectedImage = images.stanford;
+  $scope.selectedImage = images.cmu;
   // Plan view slicing
   planViewCanvas = new fabric.Canvas('map-container', {
     width: CANVAS_WIDTH,
@@ -176,7 +176,7 @@ function CameraController ($scope, $http) {
       vanishingPoint: {
         x: parseInt($scope.vanishingPoint.left/scale),
         y: parseInt($scope.vanishingPoint.top/scale),
-      }
+      },
       image: $scope.selectedImage.image
     }).success(function (res, status, headers, config) {
       if (res.status === 'success') {
